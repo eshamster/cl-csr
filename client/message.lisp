@@ -1,36 +1,36 @@
-(defpackage proto-cl-client-side-rendering/client/message
+(defpackage cl-csr/client/message
   (:use :cl)
   (:export :dequeue-draw-commands-list
            :interpret-draw-command
            :process-message)
-  (:import-from :proto-cl-client-side-rendering/client/camera
+  (:import-from :cl-csr/client/camera
                 :set-camera-params)
-  (:import-from :proto-cl-client-side-rendering/client/frame-counter
+  (:import-from :cl-csr/client/frame-counter
                 :get-frame-count)
-  (:import-from :proto-cl-client-side-rendering/client/graphics
+  (:import-from :cl-csr/client/graphics
                 :make-solid-rect
                 :make-wired-rect
                 :make-solid-circle
                 :make-wired-circle
                 :make-line
                 :make-arc)
-  (:import-from :proto-cl-client-side-rendering/client/font
+  (:import-from :cl-csr/client/font
                 :interpret-font-message
                 :make-text-mesh)
-  (:import-from :proto-cl-client-side-rendering/protocol
+  (:import-from :cl-csr/protocol
                 :code-to-name
                 :name-to-code
                 :draw-code-p
                 :texture-code-p
                 :font-code-p
                 :number-to-bool)
-  (:import-from :proto-cl-client-side-rendering/client/renderer
+  (:import-from :cl-csr/client/renderer
                 :get-screen-size
                 :set-screen-size)
-  (:import-from :proto-cl-client-side-rendering/client/texture
+  (:import-from :cl-csr/client/texture
                 :interpret-texture-message
                 :make-image-mesh)
-  (:import-from :proto-cl-client-side-rendering/utils/buffered-queue
+  (:import-from :cl-csr/utils/buffered-queue
                 :init-buffered-queue
                 :queue-to-buffer
                 :dequeue-list-from-buffer)
@@ -45,7 +45,7 @@
                 :defun.ps
                 :defun.ps+
                 :enable-ps-experiment-syntax))
-(in-package :proto-cl-client-side-rendering/client/message)
+(in-package :cl-csr/client/message)
 
 (enable-ps-experiment-syntax)
 

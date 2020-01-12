@@ -1,4 +1,4 @@
-(defpackage proto-cl-client-side-rendering/client/utils
+(defpackage cl-csr/client/utils
   (:use :cl
         :parenscript
         :ps-experiment)
@@ -9,7 +9,7 @@
            :make-dummy-rect-mesh)
   (:import-from :alexandria
                 :make-keyword))
-(in-package :proto-cl-client-side-rendering/client/utils)
+(in-package :cl-csr/client/utils)
 
 ;; --- interface --- ;;
 

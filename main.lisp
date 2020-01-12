@@ -1,17 +1,17 @@
-(defpackage proto-cl-client-side-rendering/main
-  (:nicknames :proto-cl-client-side-rendering)
+(defpackage cl-csr/main
+  (:nicknames :cl-csr)
   (:use :cl
-        :proto-cl-client-side-rendering/camera
-        :proto-cl-client-side-rendering/font
-        :proto-cl-client-side-rendering/game-loop
-        :proto-cl-client-side-rendering/graphics
-        :proto-cl-client-side-rendering/input
-        :proto-cl-client-side-rendering/middleware
-        :proto-cl-client-side-rendering/screen-size
-        :proto-cl-client-side-rendering/texture
-        :proto-cl-client-side-rendering/utils/dependency
-        :proto-cl-client-side-rendering/ws-server
-        :proto-cl-client-side-rendering/client-list-manager)
+        :cl-csr/camera
+        :cl-csr/font
+        :cl-csr/game-loop
+        :cl-csr/graphics
+        :cl-csr/input
+        :cl-csr/middleware
+        :cl-csr/screen-size
+        :cl-csr/texture
+        :cl-csr/utils/dependency
+        :cl-csr/ws-server
+        :cl-csr/client-list-manager)
   (:export ;; camera
            :get-camera-center-pos
            :get-camera-scale

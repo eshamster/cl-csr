@@ -1,23 +1,23 @@
-(defpackage proto-cl-client-side-rendering/camera
+(defpackage cl-csr/camera
   (:use :cl)
   (:export :update-camera-info
            :get-camera-center-pos
            :get-camera-scale
            :set-camera-center-pos
            :set-camera-scale)
-  (:import-from :proto-cl-client-side-rendering/client-list-manager
+  (:import-from :cl-csr/client-list-manager
                 :get-new-client-id-list
                 :get-deleted-client-id-list)
-  (:import-from :proto-cl-client-side-rendering/frame-counter
+  (:import-from :cl-csr/frame-counter
                 :get-frame-count
                 :incf-index-in-frame)
-  (:import-from :proto-cl-client-side-rendering/protocol
+  (:import-from :cl-csr/protocol
                 :send-set-camera)
-  (:import-from :proto-cl-client-side-rendering/screen-size
+  (:import-from :cl-csr/screen-size
                 :get-screen-size)
-  (:import-from :proto-cl-client-side-rendering/ws-server
+  (:import-from :cl-csr/ws-server
                 :*target-client-id-list*))
-(in-package :proto-cl-client-side-rendering/camera)
+(in-package :cl-csr/camera)
 
 ;; --- data --- ;;
 

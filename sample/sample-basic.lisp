@@ -1,8 +1,8 @@
-(defpackage sample-proto-cl-client-side-rendering/sample-basic
+(defpackage sample-cl-csr/sample-basic
   (:use :cl)
   (:export :start-basic-sample
            :stop-basic-sample)
-  (:import-from :proto-cl-client-side-rendering
+  (:import-from :cl-csr
                 :start-game-loop
                 :stop-game-loop
                 :draw-rect
@@ -19,7 +19,7 @@
                 :get-wheel-delta-y
                 :touch-summary-down-p
                 :get-touch-summary-pos))
-(in-package :sample-proto-cl-client-side-rendering/sample-basic)
+(in-package :sample-cl-csr/sample-basic)
 
 (defun start-basic-sample ()
   (start-game-loop :update-func (lambda () (update))))

@@ -1,18 +1,18 @@
-(defpackage proto-cl-client-side-rendering/screen-size
+(defpackage cl-csr/screen-size
   (:use :cl)
   (:export :update-screen-size
            :get-screen-size
            :set-screen-size)
-  (:import-from :proto-cl-client-side-rendering/client-list-manager
+  (:import-from :cl-csr/client-list-manager
                 :get-new-client-id-list)
-  (:import-from :proto-cl-client-side-rendering/frame-counter
+  (:import-from :cl-csr/frame-counter
                 :get-frame-count
                 :incf-index-in-frame)
-  (:import-from :proto-cl-client-side-rendering/protocol
+  (:import-from :cl-csr/protocol
                 :send-set-screen-size)
-  (:import-from :proto-cl-client-side-rendering/ws-server
+  (:import-from :cl-csr/ws-server
                 :*target-client-id-list*))
-(in-package :proto-cl-client-side-rendering/screen-size)
+(in-package :cl-csr/screen-size)
 
 ;; Note: Assume that screen size is common for all clients.
 

@@ -1,29 +1,29 @@
-(defpackage proto-cl-client-side-rendering/font
+(defpackage cl-csr/font
   (:use :cl)
   (:export :load-font
            :update-font
            :get-font-id
            :calc-text-width
            :calc-text-height)
-  (:import-from :proto-cl-client-side-rendering/client-list-manager
+  (:import-from :cl-csr/client-list-manager
                 :with-sending-to-new-clients)
-  (:import-from :proto-cl-client-side-rendering/frame-counter
+  (:import-from :cl-csr/frame-counter
                 :get-frame-count
                 :incf-index-in-frame)
-  (:import-from :proto-cl-client-side-rendering/font-utils
+  (:import-from :cl-csr/font-utils
                 :font-info-common
                 :init-font-info-common
                 :get-total-width
                 :get-total-height)
-  (:import-from :proto-cl-client-side-rendering/protocol
+  (:import-from :cl-csr/protocol
                 :send-load-font)
-  (:import-from :proto-cl-client-side-rendering/texture
+  (:import-from :cl-csr/texture
                 :get-image-relative-path
                 :get-image-root-path
                 :get-texture-id)
   (:import-from :alexandria
                 :maphash-values))
-(in-package :proto-cl-client-side-rendering/font)
+(in-package :cl-csr/font)
 
 ;; --- data --- ;;
 

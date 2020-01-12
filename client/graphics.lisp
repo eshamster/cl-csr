@@ -1,4 +1,4 @@
-(defpackage proto-cl-client-side-rendering/client/graphics
+(defpackage cl-csr/client/graphics
   (:use :cl)
   (:export :make-line
            :make-lines
@@ -27,7 +27,7 @@
                 :defun.ps
                 :defun.ps+
                 :defmacro.ps+))
-(in-package :proto-cl-client-side-rendering/client/graphics)
+(in-package :cl-csr/client/graphics)
 
 ;; Note: This is ported from cl-web-2d-game
 

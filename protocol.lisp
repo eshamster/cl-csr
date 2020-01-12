@@ -1,4 +1,4 @@
-(defpackage proto-cl-client-side-rendering/protocol
+(defpackage cl-csr/protocol
   (:use :cl)
   (:export :code-to-name
            :name-to-code
@@ -23,7 +23,7 @@
            :font-code-p
            :bool-to-number
            :number-to-bool)
-  (:import-from :proto-cl-client-side-rendering/ws-server
+  (:import-from :cl-csr/ws-server
                 :send-from-server
                 :*target-client-id-list*
                 :same-target-client-list-p
@@ -37,7 +37,7 @@
                 :defvar.ps+
                 :defun.ps+
                 :def-top-level-form.ps+))
-(in-package :proto-cl-client-side-rendering/protocol)
+(in-package :cl-csr/protocol)
 
 (defvar.ps+ *code-to-name-table* nil)
 (defvar.ps+ *name-to-code-table* nil)

@@ -1,4 +1,4 @@
-(defpackage proto-cl-client-side-rendering/client/socket
+(defpackage cl-csr/client/socket
   (:use :cl)
   (:export :register-socket-on-message
            :send-json-to-server)
@@ -9,7 +9,7 @@
                 :defvar.ps
                 :defun.ps
                 :enable-ps-experiment-syntax))
-(in-package :proto-cl-client-side-rendering/client/socket)
+(in-package :cl-csr/client/socket)
 
 (enable-ps-experiment-syntax)
 

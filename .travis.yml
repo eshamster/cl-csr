@@ -18,4 +18,4 @@ install:
   - ros -e '(ql:register-local-projects)' -q
 
 script:
-  - rove proto-cl-client-side-rendering.asd
+  - rove cl-csr.asd

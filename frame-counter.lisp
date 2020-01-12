@@ -1,10 +1,10 @@
-(defpackage proto-cl-client-side-rendering/frame-counter
+(defpackage cl-csr/frame-counter
   (:use :cl)
   (:export :incf-frame-count
            :get-frame-count
            :reset-frame-count
            :incf-index-in-frame))
-(in-package :proto-cl-client-side-rendering/frame-counter)
+(in-package :cl-csr/frame-counter)
 
 (defvar *current-frame* 0)
 (defvar *index-in-frame* 0)

@@ -1,4 +1,4 @@
-(defpackage proto-cl-client-side-rendering/utils/input
+(defpackage cl-csr/utils/input
   (:use :cl)
   (:export :make-key-input-info
            :update-key-input-info
@@ -8,7 +8,7 @@
            :input-up-p
            :set-raw-key-state
            :get-input-state))
-(in-package :proto-cl-client-side-rendering/utils/input)
+(in-package :cl-csr/utils/input)
 
 ;; --- data --- ;;
 

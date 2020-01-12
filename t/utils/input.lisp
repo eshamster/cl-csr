@@ -1,8 +1,8 @@
-(defpackage proto-cl-client-side-rendering/t/utils/input
+(defpackage cl-csr/t/utils/input
   (:use :cl
         :rove
-        :proto-cl-client-side-rendering/utils/input))
-(in-package :proto-cl-client-side-rendering/t/utils/input)
+        :cl-csr/utils/input))
+(in-package :cl-csr/t/utils/input)
 
 (defstruct test-def
   desc

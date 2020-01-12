@@ -1,11 +1,11 @@
-(defpackage proto-cl-client-side-rendering/client/renderer
+(defpackage cl-csr/client/renderer
   (:use :cl)
   (:export :init-screen-size
            :set-screen-size
            :get-screen-size
            :get-screen-scale
            :get-rendered-dom)
-  (:import-from :proto-cl-client-side-rendering/client/camera
+  (:import-from :cl-csr/client/camera
                 :init-camera
                 :set-camera-params)
   (:import-from :ps-experiment
@@ -14,7 +14,7 @@
                 :defun.ps
                 :defun.ps+
                 :enable-ps-experiment-syntax))
-(in-package :proto-cl-client-side-rendering/client/renderer)
+(in-package :cl-csr/client/renderer)
 
 (enable-ps-experiment-syntax)
 

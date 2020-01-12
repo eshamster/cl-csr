@@ -1,4 +1,4 @@
-(defpackage proto-cl-client-side-rendering/font-utils
+(defpackage cl-csr/font-utils
   (:use :cl
         :parenscript
         :ps-experiment)
@@ -17,7 +17,7 @@
            :char-uv-info-origin-x
            :char-uv-info-origin-y
            :char-uv-info-advance))
-(in-package :proto-cl-client-side-rendering/font-utils)
+(in-package :cl-csr/font-utils)
 
 ;; Common codes for server and client.
 

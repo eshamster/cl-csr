@@ -1,28 +1,28 @@
-(defpackage proto-cl-client-side-rendering/game-loop
+(defpackage cl-csr/game-loop
   (:use :cl)
   (:export :start-game-loop
            :stop-game-loop
            :get-fps
            :set-fps
            :log-console)
-  (:import-from :proto-cl-client-side-rendering/camera
+  (:import-from :cl-csr/camera
                 :update-camera-info)
-  (:import-from :proto-cl-client-side-rendering/client-list-manager
+  (:import-from :cl-csr/client-list-manager
                 :update-client-list
                 :get-new-client-id-list
                 :with-sending-to-new-clients)
-  (:import-from :proto-cl-client-side-rendering/frame-counter
+  (:import-from :cl-csr/frame-counter
                 :incf-frame-count
                 :get-frame-count
                 :reset-frame-count
                 :incf-index-in-frame)
-  (:import-from :proto-cl-client-side-rendering/font
+  (:import-from :cl-csr/font
                 :update-font)
-  (:import-from :proto-cl-client-side-rendering/graphics
+  (:import-from :cl-csr/graphics
                 :update-graphics)
-  (:import-from :proto-cl-client-side-rendering/input
+  (:import-from :cl-csr/input
                 :update-input)
-  (:import-from :proto-cl-client-side-rendering/protocol
+  (:import-from :cl-csr/protocol
                 :send-frame-start
                 :send-delete-draw-object
                 :send-draw-rect
@@ -32,11 +32,11 @@
                 :send-log-console
                 :send-frame-end
                 :send-set-fps)
-  (:import-from :proto-cl-client-side-rendering/screen-size
+  (:import-from :cl-csr/screen-size
                 :update-screen-size)
-  (:import-from :proto-cl-client-side-rendering/texture
+  (:import-from :cl-csr/texture
                 :update-texture)
-  (:import-from :proto-cl-client-side-rendering/ws-server
+  (:import-from :cl-csr/ws-server
                 :send-from-server
                 :*target-client-id-list*)
   (:import-from :alexandria
@@ -45,7 +45,7 @@
   (:import-from :bordeaux-threads
                 :make-thread
                 :join-thread))
-(in-package :proto-cl-client-side-rendering/game-loop)
+(in-package :cl-csr/game-loop)
 
 ;; --- data --- ;;
 

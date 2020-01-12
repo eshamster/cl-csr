@@ -1,19 +1,19 @@
-(defpackage proto-cl-client-side-rendering/client/input
+(defpackage cl-csr/client/input
   (:use :cl)
   (:export :init-input)
-  (:import-from :proto-cl-client-side-rendering/protocol
+  (:import-from :cl-csr/protocol
                 :name-to-code)
-  (:import-from :proto-cl-client-side-rendering/client/renderer
+  (:import-from :cl-csr/client/renderer
                 :get-rendered-dom
                 :get-screen-scale)
-  (:import-from :proto-cl-client-side-rendering/client/socket
+  (:import-from :cl-csr/client/socket
                 :send-json-to-server)
   (:import-from :ps-experiment
                 :defvar.ps
                 :defun.ps
                 :defun.ps+
                 :enable-ps-experiment-syntax))
-(in-package :proto-cl-client-side-rendering/client/input)
+(in-package :cl-csr/client/input)
 
 (enable-ps-experiment-syntax)
 

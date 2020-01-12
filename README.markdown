@@ -1,14 +1,14 @@
-# Proto-Cl-Client-Side-Rendering - A prototype of hot loads in Common Lisp using WebSocket
+# CL-CSR - A client side reindering libirary in Common Lisp using WebSocket
 
-Proto-Cl-Client-Side-Rendering is a prototype of client side rendering in Common Lisp.
+CL-CSR is a client side reindering libirary in Common Lisp using WebSocket. But this is in alpha quality.
 
 ## Execute sample
 
 Please clone this (and [ps-experiment](https://github.com/eshamster/ps-experiment)) to where quicklisp (asdf) can find. Then, load it by `ql:quickload` and start server. After that, you can access to http://localhost:5000 .
 
 ```lisp
-CL-USER> (ql:quickload :sample-proto-cl-client-side-rendering)
-CL-USER> (sample-proto-cl-client-side-rendering:start :port 5000)
+CL-USER> (ql:quickload :sample-cl-csr)
+CL-USER> (sample-cl-csr:start :port 5000)
 ```
 
 

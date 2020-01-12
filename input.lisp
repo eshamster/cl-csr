@@ -1,4 +1,4 @@
-(defpackage proto-cl-client-side-rendering/input
+(defpackage cl-csr/input
   (:use :cl)
   (:export :update-input
 
@@ -19,7 +19,7 @@
            :touch-summary-up-now-p
            :touch-summary-up-p
            :get-touch-summary-pos)
-  (:import-from :proto-cl-client-side-rendering/utils/input
+  (:import-from :cl-csr/utils/input
                 :make-key-input-info
                 :update-key-input-info
                 :input-down-now-p
@@ -28,18 +28,18 @@
                 :input-up-p
                 :set-raw-key-state
                 :get-input-state)
-  (:import-from :proto-cl-client-side-rendering/client-list-manager
+  (:import-from :cl-csr/client-list-manager
                 :get-deleted-client-id-list)
-  (:import-from :proto-cl-client-side-rendering/protocol
+  (:import-from :cl-csr/protocol
                 :name-to-code
                 :code-to-name)
-  (:import-from :proto-cl-client-side-rendering/ws-server
+  (:import-from :cl-csr/ws-server
                 :register-message-processor)
   (:import-from :alexandria
                 :make-keyword
                 :ensure-gethash
                 :hash-table-values))
-(in-package :proto-cl-client-side-rendering/input)
+(in-package :cl-csr/input)
 
 (progn
   (defun process-input-message (client-id message-table)

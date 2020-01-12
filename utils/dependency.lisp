@@ -1,8 +1,8 @@
-(defpackage proto-cl-client-side-rendering/utils/dependency
+(defpackage cl-csr/utils/dependency
   (:use :cl)
   (:export :ensure-js-files
            :make-src-list-for-script-tag))
-(in-package :proto-cl-client-side-rendering/utils/dependency)
+(in-package :cl-csr/utils/dependency)
 
 (defparameter *cdns*
   '("https://cdnjs.cloudflare.com/ajax/libs/three.js/104/three.js"))

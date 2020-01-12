@@ -1,11 +1,11 @@
-(defpackage proto-cl-client-side-rendering/utils/buffered-queue
+(defpackage cl-csr/utils/buffered-queue
   (:use :cl
         :parenscript
         :ps-experiment)
   (:export :init-buffered-queue
            :queue-to-buffer
            :dequeue-list-from-buffer))
-(in-package :proto-cl-client-side-rendering/utils/buffered-queue)
+(in-package :cl-csr/utils/buffered-queue)
 
 ;; --- data --- ;;
 

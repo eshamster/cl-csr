@@ -1,4 +1,4 @@
-(defpackage proto-cl-client-side-rendering/ws-server
+(defpackage cl-csr/ws-server
   (:use :cl)
   (:export :*ws-app*
            :send-from-server
@@ -16,7 +16,7 @@
                 :send
                 :start-connection
                 :ready-state))
-(in-package :proto-cl-client-side-rendering/ws-server)
+(in-package :cl-csr/ws-server)
 
 (defvar *target-client-id-list* :all
   "If ':all', a message is sent to all clients.

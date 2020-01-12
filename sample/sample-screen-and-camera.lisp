@@ -1,8 +1,8 @@
-(defpackage sample-proto-cl-client-side-rendering/sample-screen-and-camera
+(defpackage sample-cl-csr/sample-screen-and-camera
   (:use :cl)
   (:export :start-screen-and-camera-sample
            :stop-screen-and-camera-sample)
-  (:import-from :proto-cl-client-side-rendering
+  (:import-from :cl-csr
                 :start-game-loop
                 :stop-game-loop
                 :draw-circle
@@ -23,7 +23,7 @@
                 :mouse-down-p
                 :get-mouse-pos
                 :get-wheel-delta-y))
-(in-package :sample-proto-cl-client-side-rendering/sample-screen-and-camera)
+(in-package :sample-cl-csr/sample-screen-and-camera)
 
 (defun start-screen-and-camera-sample ()
   (start-game-loop :update-func (lambda () (update))))

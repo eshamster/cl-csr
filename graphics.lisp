@@ -1,4 +1,4 @@
-(defpackage proto-cl-client-side-rendering/graphics
+(defpackage cl-csr/graphics
   (:use :cl)
   (:export :update-graphics
            :draw-rect
@@ -8,14 +8,14 @@
            :draw-image
            :draw-text
            :skip-drawing-in-this-frame)
-  (:import-from :proto-cl-client-side-rendering/client-list-manager
+  (:import-from :cl-csr/client-list-manager
                 :get-new-client-id-list)
-  (:import-from :proto-cl-client-side-rendering/frame-counter
+  (:import-from :cl-csr/frame-counter
                 :get-frame-count
                 :incf-index-in-frame)
-  (:import-from :proto-cl-client-side-rendering/font
+  (:import-from :cl-csr/font
                 :get-font-id)
-  (:import-from :proto-cl-client-side-rendering/protocol
+  (:import-from :cl-csr/protocol
                 :send-delete-draw-object
                 :send-draw-rect
                 :send-draw-circle
@@ -23,13 +23,13 @@
                 :send-draw-arc
                 :send-draw-image
                 :send-draw-text)
-  (:import-from :proto-cl-client-side-rendering/texture
+  (:import-from :cl-csr/texture
                 :get-image-id)
-  (:import-from :proto-cl-client-side-rendering/ws-server
+  (:import-from :cl-csr/ws-server
                 :*target-client-id-list*)
   (:import-from :alexandria
                 :make-keyword))
-(in-package :proto-cl-client-side-rendering/graphics)
+(in-package :cl-csr/graphics)
 
 ;; --- data --- ;;
 
@@ -163,7 +163,7 @@
                                       id x y depth color start-angle sweep-angle r))))
 
 (defun draw-image (&key id image-name x y depth color width height rotate)
-  "The image-name should be registered by proto-cl-client-side-rendering:load-image"
+  "The image-name should be registered by cl-csr:load-image"
   (let ((image-id (get-image-id image-name)))
     (setf (gethash id *draw-info-table*)
           (make-draw-info :sender #'send-draw-image
@@ -171,7 +171,7 @@
                                         id image-id x y depth color width height rotate)))))
 
 (defun draw-text (&key id font-name text x y depth color width height)
-  "The font-name should be registered by proto-cl-client-side-rendering:load-font"
+  "The font-name should be registered by cl-csr:load-font"
   (let ((font-id (get-font-id font-name)))
     (setf (gethash id *draw-info-table*)
           (make-draw-info :sender #'send-draw-text

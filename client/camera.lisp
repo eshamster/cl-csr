@@ -1,4 +1,4 @@
-(defpackage proto-cl-client-side-rendering/client/camera
+(defpackage cl-csr/client/camera
   (:use :cl)
   (:export :init-camera
            :get-camera
@@ -11,7 +11,7 @@
                 :defun.ps
                 :defvar.ps+
                 :enable-ps-experiment-syntax))
-(in-package :proto-cl-client-side-rendering/client/camera)
+(in-package :cl-csr/client/camera)
 
 (enable-ps-experiment-syntax)
 

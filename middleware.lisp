@@ -1,15 +1,15 @@
-(defpackage proto-cl-client-side-rendering/middleware
+(defpackage cl-csr/middleware
   (:use :cl)
   (:export :make-client-side-rendering-middleware)
-  (:import-from :proto-cl-client-side-rendering/ws-server
+  (:import-from :cl-csr/ws-server
                 :*ws-app*)
-  (:import-from :proto-cl-client-side-rendering/client/core
+  (:import-from :cl-csr/client/core
                 :output-client-js)
-  (:import-from :proto-cl-client-side-rendering/texture
+  (:import-from :cl-csr/texture
                 :set-image-path)
-  (:import-from :proto-cl-client-side-rendering/utils/dependency
+  (:import-from :cl-csr/utils/dependency
                 :ensure-js-files))
-(in-package :proto-cl-client-side-rendering/middleware)
+(in-package :cl-csr/middleware)
 
 (defun make-client-side-rendering-middleware (&key
                                                 resource-root

@@ -1,4 +1,4 @@
-(defpackage sample-proto-cl-client-side-rendering/server
+(defpackage sample-cl-csr/server
   (:use :cl
         :cl-markup)
   (:export :start
@@ -7,22 +7,22 @@
            :get-sample-list
            :get-current-sample-kind
            :get-port)
-  (:import-from :sample-proto-cl-client-side-rendering/sample-basic
+  (:import-from :sample-cl-csr/sample-basic
                 :start-basic-sample
                 :stop-basic-sample)
-  (:import-from :sample-proto-cl-client-side-rendering/sample-screen-and-camera
+  (:import-from :sample-cl-csr/sample-screen-and-camera
                 :start-screen-and-camera-sample
                 :stop-screen-and-camera-sample)
-  (:import-from :sample-proto-cl-client-side-rendering/sample-texture
+  (:import-from :sample-cl-csr/sample-texture
                 :start-texture
                 :stop-texture)
-  (:import-from :proto-cl-client-side-rendering
+  (:import-from :cl-csr
                 :ensure-js-files
                 :make-src-list-for-script-tag
                 :make-client-side-rendering-middleware)
   (:import-from :alexandria
                 :hash-table-keys))
-(in-package :sample-proto-cl-client-side-rendering/server)
+(in-package :sample-cl-csr/server)
 
 (defvar *server* nil)
 
@@ -31,7 +31,7 @@
 (defun get-port ()
   *port*)
 
-(defun start (&key (port *port*) (kind :basic))
+(defun start (&key (port *port*) (kind :basic) (address "0.0.0.0"))
   (stop)
   (setf *server*
         (clack:clackup
@@ -40,9 +40,10 @@
            :resource-root (merge-pathnames
                            "resource/"
                            (asdf:component-pathname
-                            (asdf:find-system :sample-proto-cl-client-side-rendering))))
+                            (asdf:find-system :sample-cl-csr))))
           *ningle-app*)
-         :port port))
+         :port port
+         :address address))
   (setf *port* port)
   (start-sample-game-loop :kind kind))
 
@@ -64,7 +65,7 @@
         (declare (ignorable params))
         (ensure-js-files
          (merge-pathnames
-          "js/" (asdf:system-source-directory :sample-proto-cl-client-side-rendering)))
+          "js/" (asdf:system-source-directory :sample-cl-csr)))
         (with-output-to-string (str)
           (let ((cl-markup:*output-stream* str))
             (html5 (:head

@@ -1,7 +1,7 @@
-(defpackage sample-proto-cl-client-side-rendering/admin/admin
+(defpackage sample-cl-csr/admin/admin
   (:use :cl
         :cl-markup)
-  (:import-from :sample-proto-cl-client-side-rendering/server
+  (:import-from :sample-cl-csr/server
                 :start
                 :get-ningle-app
                 :get-sample-list
@@ -17,7 +17,7 @@
                 :*response*)
   (:import-from :quri
                 :url-encode))
-(in-package :sample-proto-cl-client-side-rendering/admin/admin)
+(in-package :sample-cl-csr/admin/admin)
 
 (defun get-param (param-name params)
   (cdr (assoc param-name params :test #'string=)))

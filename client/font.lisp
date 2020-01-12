@@ -1,11 +1,11 @@
-(defpackage proto-cl-client-side-rendering/client/font
+(defpackage cl-csr/client/font
   (:use :cl
         :parenscript
         :ps-experiment)
   (:export :update-font
            :interpret-font-message
            :make-text-mesh)
-  (:import-from :proto-cl-client-side-rendering/font-utils
+  (:import-from :cl-csr/font-utils
                 :font-info-common
                 :dostring
                 :get-total-uv-width
@@ -19,12 +19,12 @@
                 :char-uv-info-origin-x
                 :char-uv-info-origin-y
                 :char-uv-info-advance)
-  (:import-from :proto-cl-client-side-rendering/protocol
+  (:import-from :cl-csr/protocol
                 :code-to-name)
-  (:import-from :proto-cl-client-side-rendering/client/texture
+  (:import-from :cl-csr/client/texture
                 :make-image-material
                 :texture-loaded-p)
-  (:import-from :proto-cl-client-side-rendering/client/utils
+  (:import-from :cl-csr/client/utils
                 :with-command-data
                 :make-rect-vertices
                 :make-rect-faces
@@ -34,7 +34,7 @@
                 :make-keyword)
   (:import-from :cl-ps-ecs
                 :register-func-with-pred))
-(in-package :proto-cl-client-side-rendering/client/font)
+(in-package :cl-csr/client/font)
 
 (enable-ps-experiment-syntax)
 

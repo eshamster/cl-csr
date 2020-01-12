@@ -1,8 +1,8 @@
-(defpackage sample-proto-cl-client-side-rendering/sample-texture
+(defpackage sample-cl-csr/sample-texture
   (:use :cl)
   (:export :start-texture
            :stop-texture)
-  (:import-from :proto-cl-client-side-rendering
+  (:import-from :cl-csr
                 :start-game-loop
                 :stop-game-loop
                 :draw-circle
@@ -13,7 +13,7 @@
                 :make-image-uv
                 :load-font
                 :calc-text-width))
-(in-package :sample-proto-cl-client-side-rendering/sample-texture)
+(in-package :sample-cl-csr/sample-texture)
 
 (defun start-texture ()
   (load-texture :name :sample

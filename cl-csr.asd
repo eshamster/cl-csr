@@ -1,15 +1,15 @@
 #|
-  This file is a part of proto-cl-client-side-rendering project.
+  This file is a part of cl-csr project.
   Copyright (c) 2019 eshamster (hamgoostar@gmail.com)
 |#
 
 #|
-  A sample of WebSocket in Common Lisp
+  A client side rendering library in Common Lisp
 
   Author: eshamster (hamgoostar@gmail.com)
 |#
 
-(defsystem "proto-cl-client-side-rendering"
+(defsystem "cl-csr"
   :version "0.1.0"
   :author "eshamster"
   :class :package-inferred-system
@@ -29,18 +29,18 @@
                :parenscript
                :ps-experiment
                :cl-ps-ecs
-               :proto-cl-client-side-rendering/main)
-  :description "A sample of Client side rendering in Common Lisp"
+               :cl-csr/main)
+  :description "A client side rendering library in Common Lisp"
   :long-description
   #.(read-file-string
      (subpathname *load-pathname* "README.markdown"))
-  :in-order-to ((test-op (test-op "proto-cl-client-side-rendering/t"))))
+  :in-order-to ((test-op (test-op "cl-csr/t"))))
 
-(defsystem proto-cl-client-side-rendering/t
+(defsystem cl-csr/t
   :class :package-inferred-system
-  :depends-on (:proto-cl-client-side-rendering
+  :depends-on (:cl-csr
                :rove
                "ps-experiment/t/test-utils"
-               "proto-cl-client-side-rendering/t/utils/buffered-queue"
-               "proto-cl-client-side-rendering/t/utils/input")
+               "cl-csr/t/utils/buffered-queue"
+               "cl-csr/t/utils/input")
   :perform (test-op (o c) (symbol-call :rove '#:run c)))

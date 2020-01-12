@@ -1,4 +1,4 @@
-(defpackage proto-cl-client-side-rendering/texture
+(defpackage cl-csr/texture
   (:use :cl)
   (:export :update-texture
            :make-image-uv
@@ -10,22 +10,22 @@
            :set-image-path
            :get-image-root-path
            :get-image-relative-path)
-  (:import-from :proto-cl-client-side-rendering/client-list-manager
+  (:import-from :cl-csr/client-list-manager
                 :with-sending-to-new-clients)
-  (:import-from :proto-cl-client-side-rendering/frame-counter
+  (:import-from :cl-csr/frame-counter
                 :get-frame-count
                 :incf-index-in-frame)
-  (:import-from :proto-cl-client-side-rendering/protocol
+  (:import-from :cl-csr/protocol
                 :send-load-texture
                 :send-load-image)
-  (:import-from :proto-cl-client-side-rendering/ws-server
+  (:import-from :cl-csr/ws-server
                 :*target-client-id-list*)
   (:import-from :alexandria
                 :maphash-values)
   (:import-from :opticl
                 :read-png-file
                 :with-image-bounds))
-(in-package :proto-cl-client-side-rendering/texture)
+(in-package :cl-csr/texture)
 
 ;; --- data --- ;;
 

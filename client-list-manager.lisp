@@ -1,4 +1,4 @@
-(defpackage proto-cl-client-side-rendering/client-list-manager
+(defpackage cl-csr/client-list-manager
   (:use :cl)
   (:export :update-client-list
            :get-new-client-id-list
@@ -6,11 +6,11 @@
            :get-client-id-list
            :client-alive-p
            :with-sending-to-new-clients)
-  (:import-from :proto-cl-client-side-rendering/ws-server
+  (:import-from :cl-csr/ws-server
                 :*target-client-id-list*
                 :register-callback-on-connecting
                 :register-callback-on-disconnecting))
-(in-package :proto-cl-client-side-rendering/client-list-manager)
+(in-package :cl-csr/client-list-manager)
 
 ;; TODO: should lock buffers
 

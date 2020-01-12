@@ -1,10 +1,10 @@
-(defpackage proto-cl-client-side-rendering/t/utils/buffered-queue
+(defpackage cl-csr/t/utils/buffered-queue
   (:use :cl
         :rove
         :ps-experiment/t/test-utils
         :ps-experiment
-        :proto-cl-client-side-rendering/utils/buffered-queue))
-(in-package :proto-cl-client-side-rendering/t/utils/buffered-queue)
+        :cl-csr/utils/buffered-queue))
+(in-package :cl-csr/t/utils/buffered-queue)
 
 (defstruct.ps+ test-def
   desc

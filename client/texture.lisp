@@ -1,4 +1,4 @@
-(defpackage proto-cl-client-side-rendering/client/texture
+(defpackage cl-csr/client/texture
   (:use :cl
         :parenscript
         :ps-experiment)
@@ -7,9 +7,9 @@
            :make-image-mesh
            :make-image-material
            :texture-loaded-p)
-  (:import-from :proto-cl-client-side-rendering/protocol
+  (:import-from :cl-csr/protocol
                 :code-to-name)
-  (:import-from :proto-cl-client-side-rendering/client/utils
+  (:import-from :cl-csr/client/utils
                 :with-command-data
                 :make-rect-vertices
                 :make-rect-faces
@@ -19,7 +19,7 @@
                 :make-keyword)
   (:import-from :cl-ps-ecs
                 :register-func-with-pred))
-(in-package :proto-cl-client-side-rendering/client/texture)
+(in-package :cl-csr/client/texture)
 
 (enable-ps-experiment-syntax)
 

@@ -1,24 +1,24 @@
-(defpackage proto-cl-client-side-rendering/client/core
+(defpackage cl-csr/client/core
   (:use :cl)
   (:export :output-client-js)
-  (:import-from :proto-cl-client-side-rendering/client/camera
+  (:import-from :cl-csr/client/camera
                 :get-camera)
-  (:import-from :proto-cl-client-side-rendering/client/font
+  (:import-from :cl-csr/client/font
                 :update-font)
-  (:import-from :proto-cl-client-side-rendering/client/frame-counter
+  (:import-from :cl-csr/client/frame-counter
                 :update-frame-counter)
-  (:import-from :proto-cl-client-side-rendering/client/input
+  (:import-from :cl-csr/client/input
                 :init-input)
-  (:import-from :proto-cl-client-side-rendering/client/message
+  (:import-from :cl-csr/client/message
                 :dequeue-draw-commands-list
                 :interpret-draw-command
                 :process-message)
-  (:import-from :proto-cl-client-side-rendering/client/renderer
+  (:import-from :cl-csr/client/renderer
                 :init-screen-size
                 :get-screen-size)
-  (:import-from :proto-cl-client-side-rendering/client/socket
+  (:import-from :cl-csr/client/socket
                 :register-socket-on-message)
-  (:import-from :proto-cl-client-side-rendering/client/texture
+  (:import-from :cl-csr/client/texture
                 :update-texture)
   (:import-from :cl-ps-ecs
                 :ecs-main)
@@ -34,7 +34,7 @@
                 :def-top-level-form.ps
                 :enable-ps-experiment-syntax
                 :with-use-ps-pack))
-(in-package :proto-cl-client-side-rendering/client/core)
+(in-package :cl-csr/client/core)
 
 (enable-ps-experiment-syntax)
 

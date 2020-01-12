@@ -1,4 +1,4 @@
-(defpackage proto-cl-client-side-rendering/client/frame-counter
+(defpackage cl-csr/client/frame-counter
   (:use :cl)
   (:export :update-frame-counter
            :get-frame-count)
@@ -6,7 +6,7 @@
                 :defvar.ps+
                 :defun.ps+
                 :enable-ps-experiment-syntax))
-(in-package :proto-cl-client-side-rendering/client/frame-counter)
+(in-package :cl-csr/client/frame-counter)
 
 (enable-ps-experiment-syntax)
 

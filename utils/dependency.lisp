@@ -5,7 +5,7 @@
 (in-package :cl-csr/utils/dependency)
 
 (defparameter *cdns*
-  '("https://cdnjs.cloudflare.com/ajax/libs/three.js/104/three.js"))
+  '("https://cdnjs.cloudflare.com/ajax/libs/pixi.js/5.2.0/pixi.js"))
 
 (defparameter *js-pairs*
   '(

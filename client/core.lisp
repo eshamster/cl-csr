@@ -14,8 +14,8 @@
                 :interpret-draw-command
                 :process-message)
   (:import-from :cl-csr/client/renderer
-                :init-screen-size
-                :get-screen-size)
+                :get-screen-size
+                :init-renderer)
   (:import-from :cl-csr/client/socket
                 :register-socket-on-message)
   (:import-from :cl-csr/client/texture
@@ -24,7 +24,6 @@
                 :ecs-main)
   (:import-from :parenscript
                 :chain
-                :new
                 :@)
   (:import-from :ps-experiment
                 :defvar.ps
@@ -52,28 +51,24 @@
 
 ;; --- initializer --- ;;
 
+(defun.ps+ empty-init-func (app)
+  (declare (ignore app)))
+
+(defun.ps+ empty-update-func (app)
+  (declare (ignore app)))
+
 (defun.ps start-2d-game (&key rendered-dom
                               (resize-to-screen-p t)
-                              (init-function (lambda (scene) nil))
-                              (update-function (lambda (scene) nil)))
-  (let* ((scene (new (#j.THREE.Scene#)))
-         (renderer (new #j.THREE.WebGLRenderer#)))
-    (init-screen-size rendered-dom renderer resize-to-screen-p)
-    (chain rendered-dom
-           (append-child renderer.dom-element))
-    (let ((light (new (#j.THREE.DirectionalLight# 0xffffff))))
-      (light.position.set 0 0.7 0.7)
-      (scene.add light))
-    (funcall init-function scene)
-    (labels ((render-loop ()
-               (request-animation-frame render-loop)
-               (renderer.render scene (get-camera))
-               (update-frame-counter)
-               (update-texture)
-               (update-font)
-               (ecs-main)
-               (funcall update-function scene)))
-      (render-loop))))
+                              (init-function #'empty-init-func)
+                              (update-function #'empty-update-func))
+  (let ((app (init-renderer rendered-dom)))
+    (funcall init-function app)
+    (app.ticker.add (lambda ()
+                      (update-frame-counter)
+                      (update-texture)
+                      (update-font)
+                      (ecs-main)
+                      (funcall update-function app)))))
 
 (defun.ps clear-scene (scene)
   (loop :while (> scene.children.length 0)

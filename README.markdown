@@ -1,6 +1,8 @@
-# CL-CSR - A client side reindering libirary in Common Lisp using WebSocket
+# CL-CSR - A client side reindering libirary in Common Lisp
 
-CL-CSR is a client side reindering libirary in Common Lisp using WebSocket. But this is in alpha quality.
+CL-CSR is a client side reindering libirary in Common Lisp.
+
+* This is only in alpha quality.
 
 ## Execute sample
 

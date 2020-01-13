@@ -61,8 +61,8 @@
   (let* ((renderer (get-rendered-dom))
          (canvas (renderer.query-selector "canvas"))
          (scale (get-screen-scale)))
-    (values (floor (/ (- x renderer.offset-left) scale))
-            (floor (/ (+ (- canvas.height y) renderer.offset-top) scale)))))
+    (values (floor (/ (- x canvas.offset-left) scale))
+            (floor (/ (- y canvas.offset-top) scale)))))
 
 (defun.ps+ mouse-button-to-string (button)
   (case button

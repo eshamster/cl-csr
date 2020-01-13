@@ -169,11 +169,11 @@
 
 (defun.ps update-common-mesh-params (mesh data-table)
   (mesh.position.set (gethash :x data-table)
-                     (gethash :y data-table)
-                     (gethash :depth data-table))
+                     (gethash :y data-table))
+  ;; TODO: set z-index (gethash :depth data-table)
   (let ((rotate (gethash :rotate data-table)))
     (when rotate
-      (setf mesh.rotation.z rotate))))
+      (setf mesh.rotation rotate))))
 
 (defun.ps+ make-mesh-by-command (command)
   (let* ((kind (code-to-name (gethash :kind command)))
@@ -218,11 +218,11 @@
     (update-common-mesh-params mesh data)
     mesh))
 
-(defun.ps add-mesh-to-scene (scene mesh)
-  (scene.add mesh))
+(defun.ps add-mesh-to-scene (app mesh)
+  (app.stage.add-child mesh))
 
-(defun.ps remove-mesh-from-scene (scene mesh)
-  (scene.remove mesh))
+(defun.ps remove-mesh-from-scene (app mesh)
+  (app.stage.remove-child mesh))
 
 ;; Note: change of color can be achieved without recreating mesh.
 ;;       But currently recreate for easy of programming.
@@ -246,7 +246,7 @@
              (not (eq-params :width :height :color :text :font-id)))
             (t t))))))
 
-(defun.ps+ add-or-update-mesh (scene command)
+(defun.ps+ add-or-update-mesh (app command)
   (let* ((kind (code-to-name (gethash :kind command)))
          (data (gethash :data command))
          (id (gethash :id data))
@@ -254,22 +254,22 @@
     (cond ((eq kind :delete-draw-object) ; delete
            (when (gethash id *draw-info-table*)
              (remhash id *draw-info-table*)
-             (remove-mesh-from-scene scene (draw-info-mesh prev-info))))
+             (remove-mesh-from-scene app (draw-info-mesh prev-info))))
           ((null prev-info) ; add
            (let* ((mesh (make-mesh-by-command command)))
              (setf (gethash id *draw-info-table*)
                    (make-draw-info :kind kind
                                    :data data
                                    :mesh mesh))
-             (add-mesh-to-scene scene mesh)))
+             (add-mesh-to-scene app mesh)))
           ((should-recreate-p prev-info kind data) ; recreate
            (remhash id *draw-info-table*)
-           (remove-mesh-from-scene scene (draw-info-mesh prev-info))
-           (add-or-update-mesh scene command))
+           (remove-mesh-from-scene app (draw-info-mesh prev-info))
+           (add-or-update-mesh app command))
           (t ; simple update
            (update-common-mesh-params
             (draw-info-mesh prev-info) data)
            (setf (draw-info-data prev-info) data)))))
 
-(defun.ps+ interpret-draw-command (scene command)
-  (add-or-update-mesh scene command))
+(defun.ps+ interpret-draw-command (app command)
+  (add-or-update-mesh app command))

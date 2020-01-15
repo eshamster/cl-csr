@@ -4,7 +4,9 @@
            :get-screen-size
            :get-screen-scale
            :get-rendered-dom
-           :init-renderer)
+           :init-renderer
+           :add-graphics
+           :remove-graphics)
   (:import-from :cl-csr/client/camera
                 :init-camera
                 :set-camera-params)
@@ -17,6 +19,7 @@
                 :defvar.ps+
                 :defun.ps
                 :defun.ps+
+                :defstruct.ps+
                 :enable-ps-experiment-syntax))
 (in-package :cl-csr/client/renderer)
 
@@ -33,6 +36,10 @@
 (defvar.ps+ *screen-width* 800)
 (defvar.ps+ *screen-height* 600)
 (defvar.ps+ *screen-scale* 1)
+
+(defstruct.ps+ renderer
+    app
+  container)
 
 ;; --- interface --- ;;
 
@@ -65,21 +72,30 @@
           *screen-height* screen-height
           *screen-scale* scale)))
 
-(defun.ps init-renderer (rendered-dom)
-  (let* ((param (create :width *screen-width* :height *screen-height*))
-         (app (new (#j.PIXI.Application# param))))
-    (chain rendered-dom (append-child app.view))
-    (setf *rendered-dom* rendered-dom
-          *app* app)
-    (set-screen-size *screen-width* *screen-height*)
-    (let ((resize-timer nil))
-      (window.add-event-listener
-       "resize" (lambda (e)
-                  (declare (ignore e))
-                  (when resize-timer
-                    (clear-timeout resize-timer))
-                  (setf resize-timer
-                        (set-timeout (lambda ()
-                                       (set-screen-size *screen-width* *screen-height*))
-                                     100)))))
-    app))
+(defun.ps init-renderer (rendered-dom app)
+  (chain rendered-dom (append-child app.view))
+  (setf *rendered-dom* rendered-dom
+        *app* app)
+  (set-screen-size *screen-width* *screen-height*)
+  (let ((resize-timer nil))
+    (window.add-event-listener
+     "resize" (lambda (e)
+                (declare (ignore e))
+                (when resize-timer
+                  (clear-timeout resize-timer))
+                (setf resize-timer
+                      (set-timeout (lambda ()
+                                     (set-screen-size *screen-width* *screen-height*))
+                                   100)))))
+  (let ((container (new #j.PIXI.Container#)))
+    (app.stage.add-child container)
+    (make-renderer :app app
+                   :container container)))
+
+(defun.ps add-graphics (renderer graphics)
+  (let ((container (renderer-container renderer)))
+    (container.add-child graphics)))
+
+(defun.ps remove-graphics (renderer graphics)
+  (let ((container (renderer-container renderer)))
+    (container.remove-child graphics)))

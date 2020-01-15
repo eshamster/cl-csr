@@ -26,7 +26,9 @@
                 :number-to-bool)
   (:import-from :cl-csr/client/renderer
                 :get-screen-size
-                :set-screen-size)
+                :set-screen-size
+                :add-graphics
+                :remove-graphics)
   (:import-from :cl-csr/client/texture
                 :interpret-texture-message
                 :make-image-mesh)
@@ -218,12 +220,6 @@
     (update-common-mesh-params mesh data)
     mesh))
 
-(defun.ps add-mesh-to-scene (app mesh)
-  (app.stage.add-child mesh))
-
-(defun.ps remove-mesh-from-scene (app mesh)
-  (app.stage.remove-child mesh))
-
 ;; Note: change of color can be achieved without recreating mesh.
 ;;       But currently recreate for easy of programming.
 (defun.ps+ should-recreate-p (prev-info new-kind new-data)
@@ -246,7 +242,7 @@
              (not (eq-params :width :height :color :text :font-id)))
             (t t))))))
 
-(defun.ps+ add-or-update-mesh (app command)
+(defun.ps+ add-or-update-mesh (renderer command)
   (let* ((kind (code-to-name (gethash :kind command)))
          (data (gethash :data command))
          (id (gethash :id data))
@@ -254,22 +250,22 @@
     (cond ((eq kind :delete-draw-object) ; delete
            (when (gethash id *draw-info-table*)
              (remhash id *draw-info-table*)
-             (remove-mesh-from-scene app (draw-info-mesh prev-info))))
+             (remove-graphics renderer (draw-info-mesh prev-info))))
           ((null prev-info) ; add
            (let* ((mesh (make-mesh-by-command command)))
              (setf (gethash id *draw-info-table*)
                    (make-draw-info :kind kind
                                    :data data
                                    :mesh mesh))
-             (add-mesh-to-scene app mesh)))
+             (add-graphics renderer mesh)))
           ((should-recreate-p prev-info kind data) ; recreate
            (remhash id *draw-info-table*)
-           (remove-mesh-from-scene app (draw-info-mesh prev-info))
-           (add-or-update-mesh app command))
+           (remove-mesh-from-scene renderer (draw-info-mesh prev-info))
+           (add-or-update-mesh renderer command))
           (t ; simple update
            (update-common-mesh-params
             (draw-info-mesh prev-info) data)
            (setf (draw-info-data prev-info) data)))))
 
-(defun.ps+ interpret-draw-command (app command)
-  (add-or-update-mesh app command))
+(defun.ps+ interpret-draw-command (renderer command)
+  (add-or-update-mesh renderer command))

@@ -24,6 +24,8 @@
                 :ecs-main)
   (:import-from :parenscript
                 :chain
+                :create
+                :new
                 :@)
   (:import-from :ps-experiment
                 :defvar.ps
@@ -51,35 +53,22 @@
 
 ;; --- initializer --- ;;
 
-(defun.ps+ empty-init-func (app)
-  (declare (ignore app)))
-
-(defun.ps+ empty-update-func (app)
-  (declare (ignore app)))
-
 (defun.ps start-2d-game (&key rendered-dom
-                              (resize-to-screen-p t)
-                              (init-function #'empty-init-func)
-                              (update-function #'empty-update-func))
-  (let ((app (init-renderer rendered-dom)))
-    (funcall init-function app)
+                              (resize-to-screen-p t))
+  (let* ((app (new (#j.PIXI.Application# (create))))
+         (renderer (init-renderer rendered-dom app)))
     (app.ticker.add (lambda ()
                       (update-frame-counter)
                       (update-texture)
                       (update-font)
                       (ecs-main)
-                      (funcall update-function app)))))
+                      (update-draw renderer)))))
 
-(defun.ps clear-scene (scene)
-  (loop :while (> scene.children.length 0)
-     :do (scene.remove (@ scene children 0))))
-
-(defun.ps+ update-draw (scene)
+(defun.ps+ update-draw (renderer)
   (let ((draw-commands-list (dequeue-draw-commands-list)))
     (dolist (draw-commands draw-commands-list)
       (dolist (command draw-commands)
-        (interpret-draw-command scene command)))))
+        (interpret-draw-command renderer command)))))
 
 (def-top-level-form.ps :run-start-2d-game
-  (start-2d-game :rendered-dom (document.query-selector "#renderer")
-                 :update-function #'update-draw))
+  (start-2d-game :rendered-dom (document.query-selector "#renderer")))

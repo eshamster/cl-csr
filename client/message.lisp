@@ -1,8 +1,7 @@
 (defpackage cl-csr/client/message
   (:use :cl)
-  (:export :dequeue-draw-commands-list
-           :interpret-draw-command
-           :process-message)
+  (:export :process-message
+           :update-draw)
   (:import-from :cl-csr/client/camera
                 :set-camera-params)
   (:import-from :cl-csr/client/frame-counter
@@ -76,6 +75,7 @@
       (list)))
 
 (defun.ps push-message-to-buffer (parsed-message-list)
+  "Push message to frame buffer and return true if the message is :frame-end"
   (incf *receive-count-in-frame*)
   (let ((frame-end-p nil))
     (dolist (message parsed-message-list)
@@ -142,9 +142,26 @@
 (defun.ps interpret-log-console (command)
   (console.log (@ command :data :message)))
 
+;; - set screen size - ;;
+
+(defstruct.ps+ set-screen-size-info width height)
+
+(defvar.ps+ *set-screen-size-info-list* (list))
+
 (defun.ps interpret-set-screen-size (command)
-  (set-screen-size (@ command :data :width)
-                   (@ command :data :height)))
+  (console.log (length *set-screen-size-info-list*))
+  (push (make-set-screen-size-info :width (@ command :data :width)
+                                   :height (@ command :data :height))
+        *set-screen-size-info-list*))
+
+(defun.ps+ update-set-screen (renderer)
+  (dolist (info *set-screen-size-info-list*)
+    (set-screen-size renderer
+                     (set-screen-size-info-width info)
+                     (set-screen-size-info-height info)))
+  (setf *set-screen-size-info-list* (list)))
+
+;; - - ;;
 
 (defun.ps interpret-set-camera-params (command)
   (let ((center-x (@ command :data :center-x))
@@ -269,3 +286,10 @@
 
 (defun.ps+ interpret-draw-command (renderer command)
   (add-or-update-mesh renderer command))
+
+(defun.ps+ update-draw (renderer)
+  (let ((draw-commands-list (dequeue-draw-commands-list)))
+    (dolist (draw-commands draw-commands-list)
+      (dolist (command draw-commands)
+        (interpret-draw-command renderer command))))
+  (update-set-screen renderer))

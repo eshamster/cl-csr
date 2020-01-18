@@ -29,7 +29,6 @@
 
 (defvar.ps+ *resize-to-screen-p* t)
 (defvar.ps+ *rendered-dom* nil)
-(defvar.ps+ *app* nil)
 
 ;; Note: The values of width (800) and height (600) are temporal.
 ;; They are immediately overwritten by ":set-screen-size" operation just after connecting.
@@ -52,17 +51,16 @@
 (defun.ps+ get-rendered-dom ()
   *rendered-dom*)
 
-(defun.ps set-screen-size (screen-width screen-height)
-  (unless *app*
-    (error "The app is not initialized. Should call initalize-screen-size before set-screen-size."))
-  (let* ((app *app*)
+(defun.ps set-screen-size (renderer screen-width screen-height)
+  (let* ((app (renderer-app renderer))
          (style app.renderer.view.style)
          (scale (if *resize-to-screen-p*
                     (min (/ window.inner-width screen-width)
                          (/ window.inner-height screen-height))
                     1))
-         (width (* *screen-width* scale))
-         (height (* *screen-height* scale)))
+         (width (* screen-width scale))
+         (height (* screen-height scale)))
+    (app.renderer.resize screen-width screen-height)
     (setf style.width (+ width "px")
           style.height (+ height "px")
           style.position "absolute"
@@ -73,24 +71,24 @@
           *screen-scale* scale)))
 
 (defun.ps init-renderer (rendered-dom app)
-  (chain rendered-dom (append-child app.view))
-  (setf *rendered-dom* rendered-dom
-        *app* app)
-  (set-screen-size *screen-width* *screen-height*)
-  (let ((resize-timer nil))
-    (window.add-event-listener
-     "resize" (lambda (e)
-                (declare (ignore e))
-                (when resize-timer
-                  (clear-timeout resize-timer))
-                (setf resize-timer
-                      (set-timeout (lambda ()
-                                     (set-screen-size *screen-width* *screen-height*))
-                                   100)))))
-  (let ((container (new #j.PIXI.Container#)))
+  (let* ((container (new #j.PIXI.Container#))
+         (renderer (make-renderer :app app
+                                  :container container)))
     (app.stage.add-child container)
-    (make-renderer :app app
-                   :container container)))
+    (set-screen-size renderer *screen-width* *screen-height*)
+    (chain rendered-dom (append-child app.view))
+    (setf *rendered-dom* rendered-dom)
+    (let ((resize-timer nil))
+      (window.add-event-listener
+       "resize" (lambda (e)
+                  (declare (ignore e))
+                  (when resize-timer
+                    (clear-timeout resize-timer))
+                  (setf resize-timer
+                        (set-timeout (lambda ()
+                                       (set-screen-size renderer *screen-width* *screen-height*))
+                                     100)))))
+    renderer))
 
 (defun.ps add-graphics (renderer graphics)
   (let ((container (renderer-container renderer)))

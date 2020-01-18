@@ -10,9 +10,8 @@
   (:import-from :cl-csr/client/input
                 :init-input)
   (:import-from :cl-csr/client/message
-                :dequeue-draw-commands-list
-                :interpret-draw-command
-                :process-message)
+                :process-message
+                :update-draw)
   (:import-from :cl-csr/client/renderer
                 :get-screen-size
                 :init-renderer)
@@ -63,12 +62,6 @@
                       (update-font)
                       (ecs-main)
                       (update-draw renderer)))))
-
-(defun.ps+ update-draw (renderer)
-  (let ((draw-commands-list (dequeue-draw-commands-list)))
-    (dolist (draw-commands draw-commands-list)
-      (dolist (command draw-commands)
-        (interpret-draw-command renderer command)))))
 
 (def-top-level-form.ps :run-start-2d-game
   (start-2d-game :rendered-dom (document.query-selector "#renderer")))

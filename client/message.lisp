@@ -2,8 +2,6 @@
   (:use :cl)
   (:export :process-message
            :update-draw)
-  (:import-from :cl-csr/client/camera
-                :set-camera-params)
   (:import-from :cl-csr/client/frame-counter
                 :get-frame-count)
   (:import-from :cl-csr/client/graphics
@@ -24,8 +22,8 @@
                 :font-code-p
                 :number-to-bool)
   (:import-from :cl-csr/client/renderer
-                :get-screen-size
                 :set-screen-size
+                :set-camera
                 :add-graphics
                 :remove-graphics)
   (:import-from :cl-csr/client/texture
@@ -149,7 +147,6 @@
 (defvar.ps+ *set-screen-size-info-list* (list))
 
 (defun.ps interpret-set-screen-size (command)
-  (console.log (length *set-screen-size-info-list*))
   (push (make-set-screen-size-info :width (@ command :data :width)
                                    :height (@ command :data :height))
         *set-screen-size-info-list*))
@@ -161,17 +158,27 @@
                      (set-screen-size-info-height info)))
   (setf *set-screen-size-info-list* (list)))
 
-;; - - ;;
+;; - camera - ;;
+
+(defstruct.ps+ set-camera-info center-x center-y scale)
+
+(defvar.ps+ *set-camera-info-list* (list))
 
 (defun.ps interpret-set-camera-params (command)
-  (let ((center-x (@ command :data :center-x))
-        (center-y (@ command :data :center-y))
-        (scale (@ command :data :scale)))
-    (multiple-value-bind (width height) (get-screen-size)
-      (set-camera-params
-       :offset-x (- center-x (/ width scale 2))
-       :offset-y (- center-y (/ height scale 2))
-       :scale scale))))
+  (push (make-set-camera-info :center-x (@ command :data :center-x)
+                              :center-y (@ command :data :center-y)
+                              :scale (@ command :data :scale))
+        *set-camera-info-list*))
+
+(defun.ps+ update-camera (renderer)
+  (dolist (info *set-camera-info-list*)
+    (set-camera renderer
+                (set-camera-info-center-x info)
+                (set-camera-info-center-y info)
+                (set-camera-info-scale info)))
+  (setf *set-camera-info-list* (list)))
+
+;; - - ;;
 
 (defun.ps interpret-set-fps (command)
   (setf *server-fps* (@ command :data :value)))
@@ -292,4 +299,5 @@
     (dolist (draw-commands draw-commands-list)
       (dolist (command draw-commands)
         (interpret-draw-command renderer command))))
-  (update-set-screen renderer))
+  (update-set-screen renderer)
+  (update-camera renderer))

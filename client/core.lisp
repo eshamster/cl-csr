@@ -1,8 +1,6 @@
 (defpackage cl-csr/client/core
   (:use :cl)
   (:export :output-client-js)
-  (:import-from :cl-csr/client/camera
-                :get-camera)
   (:import-from :cl-csr/client/font
                 :update-font)
   (:import-from :cl-csr/client/frame-counter
@@ -13,7 +11,6 @@
                 :process-message
                 :update-draw)
   (:import-from :cl-csr/client/renderer
-                :get-screen-size
                 :init-renderer)
   (:import-from :cl-csr/client/socket
                 :register-socket-on-message)
@@ -47,21 +44,24 @@
                         :if-does-not-exist :create)
     (princ (with-use-ps-pack (:this)
              (register-socket-on-message #'process-message)
-             (init-input))
+             (init-input)
+             (let* ((rendered-dom (document.query-selector "#renderer"))
+                    (app (new (#j.PIXI.Application# (create))))
+                    (renderer (init-renderer rendered-dom app)))
+               (start-2d-game :app app :renderer renderer)))
            file)))
 
 ;; --- initializer --- ;;
 
-(defun.ps start-2d-game (&key rendered-dom
-                              (resize-to-screen-p t))
-  (let* ((app (new (#j.PIXI.Application# (create))))
-         (renderer (init-renderer rendered-dom app)))
-    (app.ticker.add (lambda ()
-                      (update-frame-counter)
-                      (update-texture)
-                      (update-font)
-                      (ecs-main)
-                      (update-draw renderer)))))
+(defun.ps start-2d-game (&key app renderer
+                              ;; TODO: (resize-to-screen-p t)
+                              )
+  (app.ticker.add (lambda ()
+                    (update-frame-counter)
+                    (update-texture)
+                    (update-font)
+                    (ecs-main)
+                    (update-draw renderer))))
 
 (def-top-level-form.ps :run-start-2d-game
-  (start-2d-game :rendered-dom (document.query-selector "#renderer")))
+  (console.log "test"))

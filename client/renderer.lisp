@@ -1,15 +1,12 @@
 (defpackage cl-csr/client/renderer
   (:use :cl)
   (:export :set-screen-size
-           :get-screen-size
            :get-screen-scale
+           :set-camera
            :get-rendered-dom
            :init-renderer
            :add-graphics
            :remove-graphics)
-  (:import-from :cl-csr/client/camera
-                :init-camera
-                :set-camera-params)
   (:import-from :parenscript
                 :chain
                 :create
@@ -30,10 +27,6 @@
 (defvar.ps+ *resize-to-screen-p* t)
 (defvar.ps+ *rendered-dom* nil)
 
-;; Note: The values of width (800) and height (600) are temporal.
-;; They are immediately overwritten by ":set-screen-size" operation just after connecting.
-(defvar.ps+ *screen-width* 800)
-(defvar.ps+ *screen-height* 600)
 (defvar.ps+ *screen-scale* 1)
 
 (defstruct.ps+ renderer
@@ -42,14 +35,16 @@
 
 ;; --- interface --- ;;
 
-(defun.ps+ get-screen-size ()
-  (values *screen-width* *screen-height*))
-
 (defun.ps+ get-screen-scale ()
   *screen-scale*)
 
 (defun.ps+ get-rendered-dom ()
   *rendered-dom*)
+
+(defun.ps get-screen-size (renderer)
+  (let ((app (renderer-app renderer)))
+    (values app.renderer.screen.width
+            app.renderer.screen.height)))
 
 (defun.ps set-screen-size (renderer screen-width screen-height)
   (let* ((app (renderer-app renderer))
@@ -66,16 +61,24 @@
           style.position "absolute"
           style.left (+ (/ (- window.inner-width width) 2) "px")
           style.top (+ (/ (- window.inner-height height) 2) "px"))
-    (setf *screen-width* screen-width
-          *screen-height* screen-height
-          *screen-scale* scale)))
+    (setf *screen-scale* scale)))
+
+(defun.ps set-camera (renderer center-x center-y scale)
+  (let ((container (renderer-container renderer)))
+    (setf container.scale.x scale
+          container.scale.y scale)
+    (multiple-value-bind (width height) (get-screen-size renderer)
+      (setf container.x (- center-x (/ width scale 2))
+            container.y (- center-y (/ height scale 2))))))
 
 (defun.ps init-renderer (rendered-dom app)
   (let* ((container (new #j.PIXI.Container#))
          (renderer (make-renderer :app app
                                   :container container)))
     (app.stage.add-child container)
-    (set-screen-size renderer *screen-width* *screen-height*)
+    ;; Note: The values of width (0) and height (0) are temporal.
+    ;; They are immediately overwritten by ":set-screen-size" operation just after connecting.
+    (set-screen-size renderer 0 0)
     (chain rendered-dom (append-child app.view))
     (setf *rendered-dom* rendered-dom)
     (let ((resize-timer nil))
@@ -86,7 +89,9 @@
                     (clear-timeout resize-timer))
                   (setf resize-timer
                         (set-timeout (lambda ()
-                                       (set-screen-size renderer *screen-width* *screen-height*))
+                                       (multiple-value-bind (width height)
+                                           (get-screen-size renderer)
+                                         (set-screen-size renderer width height)))
                                      100)))))
     renderer))
 

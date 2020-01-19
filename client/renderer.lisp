@@ -1,9 +1,9 @@
 (defpackage cl-csr/client/renderer
   (:use :cl)
   (:export :set-screen-size
+           :get-screen-offset
            :get-screen-scale
            :set-camera
-           :get-rendered-dom
            :init-renderer
            :add-graphics
            :remove-graphics)
@@ -24,44 +24,43 @@
 
 ;; --- data --- ;;
 
-(defvar.ps+ *resize-to-screen-p* t)
-(defvar.ps+ *rendered-dom* nil)
-
-(defvar.ps+ *screen-scale* 1)
-
 (defstruct.ps+ renderer
     app
-  container)
+  container
+  screen-scale)
 
 ;; --- interface --- ;;
-
-(defun.ps+ get-screen-scale ()
-  *screen-scale*)
-
-(defun.ps+ get-rendered-dom ()
-  *rendered-dom*)
 
 (defun.ps get-screen-size (renderer)
   (let ((app (renderer-app renderer)))
     (values app.renderer.screen.width
             app.renderer.screen.height)))
 
+(defun.ps get-screen-offset (renderer)
+  (let* ((app (renderer-app renderer))
+         (style app.renderer.view.style))
+    (flet ((parse (val)
+             (parse-int (val.replace "px" "")))))
+    (values (parse style.left)
+            (parse style.top))))
+
+(defun.ps get-screen-scale (renderer)
+  (renderer-screen-scale renderer))
+
 (defun.ps set-screen-size (renderer screen-width screen-height)
   (let* ((app (renderer-app renderer))
          (style app.renderer.view.style)
-         (scale (if *resize-to-screen-p*
-                    (min (/ window.inner-width screen-width)
-                         (/ window.inner-height screen-height))
-                    1))
+         (scale (min (/ window.inner-width screen-width)
+                     (/ window.inner-height screen-height)))
          (width (* screen-width scale))
          (height (* screen-height scale)))
+    (setf (renderer-screen-scale renderer) scale)
     (app.renderer.resize screen-width screen-height)
     (setf style.width (+ width "px")
           style.height (+ height "px")
           style.position "absolute"
           style.left (+ (/ (- window.inner-width width) 2) "px")
-          style.top (+ (/ (- window.inner-height height) 2) "px"))
-    (setf *screen-scale* scale)))
+          style.top (+ (/ (- window.inner-height height) 2) "px"))))
 
 (defun.ps set-camera (renderer center-x center-y scale)
   (let ((container (renderer-container renderer)))

@@ -44,10 +44,10 @@
                         :if-does-not-exist :create)
     (princ (with-use-ps-pack (:this)
              (register-socket-on-message #'process-message)
-             (init-input)
              (let* ((rendered-dom (document.query-selector "#renderer"))
                     (app (new (#j.PIXI.Application# (create))))
                     (renderer (init-renderer rendered-dom app)))
+               (init-input renderer)
                (start-2d-game :app app :renderer renderer)))
            file)))
 

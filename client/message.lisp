@@ -284,7 +284,7 @@
              (add-graphics renderer mesh)))
           ((should-recreate-p prev-info kind data) ; recreate
            (remhash id *draw-info-table*)
-           (remove-mesh-from-scene renderer (draw-info-mesh prev-info))
+           (remove-graphics renderer (draw-info-mesh prev-info))
            (add-or-update-mesh renderer command))
           (t ; simple update
            (update-common-mesh-params

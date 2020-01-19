@@ -18,11 +18,14 @@
                 :get-mouse-pos
                 :get-wheel-delta-y
                 :touch-summary-down-p
-                :get-touch-summary-pos))
+                :get-touch-summary-pos
+
+                :set-screen-size))
 (in-package :sample-cl-csr/sample-basic)
 
 (defun start-basic-sample ()
-  (start-game-loop :update-func (lambda () (update))))
+  (start-game-loop :update-func (lambda () (update)))
+  (set-screen-size :width 800 :height 600))
 
 (defun stop-basic-sample ()
   (stop-game-loop))

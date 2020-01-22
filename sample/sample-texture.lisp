@@ -5,6 +5,7 @@
   (:import-from :cl-csr
                 :start-game-loop
                 :stop-game-loop
+                :set-screen-size
                 :draw-circle
                 :draw-image
                 :draw-text
@@ -37,14 +38,16 @@
               :texture-name :multiple-image
               :uv (make-image-uv :x 0.5 :width 0.5))
 
-  (load-texture :name :sample-font
-                :path "font.png"
-                :alpha-path "font_alpha.png")
-  (load-font :name :sample-font
-             :texture-name :sample-font
-             :json-path "font.json")
+  (unless t
+    (load-texture :name :sample-font
+                  :path "font.png"
+                  :alpha-path "font_alpha.png")
+    (load-font :name :sample-font
+               :texture-name :sample-font
+               :json-path "font.json"))
 
-  (start-game-loop :update-func (lambda () (update))))
+  (start-game-loop :update-func (lambda () (update)))
+  (set-screen-size :width 800 :height 600))
 
 (defun stop-texture ()
   (stop-game-loop))

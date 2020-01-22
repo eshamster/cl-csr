@@ -6,7 +6,8 @@
            :set-camera
            :init-renderer
            :add-graphics
-           :remove-graphics)
+           :remove-graphics
+           :graphics-added-p)
   (:import-from :parenscript
                 :chain
                 :create
@@ -101,3 +102,7 @@
 (defun.ps remove-graphics (renderer graphics)
   (let ((container (renderer-container renderer)))
     (container.remove-child graphics)))
+
+(defun.ps graphics-added-p (renderer graphics)
+  (declare (ignore renderer))
+  (when graphics.parent t))

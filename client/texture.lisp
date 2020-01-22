@@ -9,12 +9,10 @@
            :texture-loaded-p)
   (:import-from :cl-csr/protocol
                 :code-to-name)
+  (:import-from :cl-csr/client/graphics
+                :make-solid-rect)
   (:import-from :cl-csr/client/utils
-                :with-command-data
-                :make-rect-vertices
-                :make-rect-faces
-                :make-rect-face-vertex-uvs
-                :make-dummy-rect-mesh)
+                :with-command-data)
   (:import-from :alexandria
                 :make-keyword)
   (:import-from :cl-ps-ecs
@@ -59,9 +57,8 @@
 (defun.ps+ interpret-texture-message (kind-code command)
   (ecase (code-to-name kind-code)
     (:load-texture
-     (with-command-data (path alpha-path texture-id) command
-       (load-texture :path path :id texture-id
-                     :alpha-path alpha-path)))
+     (with-command-data (path texture-id) command
+       (load-texture :path path :id texture-id)))
     (:load-image
      (with-command-data (image-id texture-id uv-x uv-y uv-width uv-height)
          command
@@ -75,79 +72,48 @@
 ;; - for drawer - ;;
 
 (defun.ps make-image-mesh (&key image-id width height color)
-  (flet ((make-geometry-and-material ()
+  (flet ((make-sprite ()
            (let* ((img-info (find-image-info-by-image-id image-id))
-                  (tex-id (image-info-texture-id img-info)))
-             (values
-              (with-slots (uv-x uv-y uv-width uv-height) img-info
-                (make-image-geometry :width width
-                                     :height height
-                                     :uv-x uv-x
-                                     :uv-y uv-y
-                                     :uv-width uv-width
-                                     :uv-height uv-height))
-              (make-image-material :tex-id tex-id
-                                   :color color)))))
-    ;; If the image has not been loaded, returns a temoral mesh with
-    ;; same width, height, and monochromatic. Then, rewrites by the image
+                  (tex-id (image-info-texture-id img-info))
+                  (tex (get-texture tex-id)))
+             (with-slots (uv-x uv-y uv-width uv-height) img-info
+               (init-texture-uv tex uv-x uv-y uv-width uv-height))
+             (new (#j.PIXI.Sprite# tex)))))
+    ;; If the texture has not been loaded, returns a container with a temporal rectangle
+    ;; that has same width, height. Then, rewrites by sprite created using the texture
     ;; after loading it.
-    (unless (image-loaded-p image-id)
-      (let ((result-mesh (make-dummy-rect-mesh :width width :height height)))
-        (register-func-with-pred
-         (lambda ()
-           (multiple-value-bind (geometry material)
-               (make-geometry-and-material)
-             (setf result-mesh.geometry geometry
-                   result-mesh.material material)))
-         (lambda () (image-loaded-p image-id)))
-        (return-from make-image-mesh
-          result-mesh)))
-    ;; The case where the image has been loaded.
-    (multiple-value-bind (geometry material)
-        (make-geometry-and-material)
-      (new (#j.THREE.Mesh# geometry material)))))
-
-(defun.ps make-image-material (&key tex-id color)
-  (let* ((tex-info (gethash tex-id *texture-info-table*))
-         (alpha-bitmap (texture-info-alpha-bitmap-image tex-info)))
-    (new (#j.THREE.MeshBasicMaterial#
-          (create map (texture-info-bitmap-image tex-info)
-                  alpha-map alpha-bitmap
-                  transparent (if alpha-bitmap true false)
-                  color color)))))
+    (let ((container (new (#j.PIXI.Container#))))
+      (unless (image-loaded-p image-id)
+        (let ((dummy-rect (make-solid-rect :width width :height height :color #x888888)))
+          (register-func-with-pred
+           (lambda ()
+             (container.remove-child dummy-rect)
+             (container.add-child (make-sprite)))
+           (lambda () (image-loaded-p image-id)))
+          (container.add-child dummy-rect)
+          (return-from make-image-mesh container)))
+      ;; the case where the texture has been loaded.
+      (container.add-child (make-sprite))
+      container)))
 
 (defun.ps+ texture-loaded-p (tex-id)
   (gethash tex-id *texture-info-table*))
 
 ;; --- internal --- ;;
 
-(defun.ps load-texture (&key path alpha-path id)
-  (let* ((loader (new (#j.THREE.TextureLoader#)))
-         (image-promise
-          (make-texture-load-promise loader path))
-         (alpha-image-promise
-          (make-texture-load-promise loader alpha-path)))
-    (chain -promise
-           (all (list image-promise alpha-image-promise))
-           (then (lambda (images)
-                   (push (make-texture-info
-                          :id id
-                          :bitmap-image (aref images 0)
-                          :alpha-bitmap-image (aref images 1))
-                         *texture-info-buffer*))))))
+(defun.ps load-texture (&key path id)
+  (let ((name (id-to-name id)))
+    (chain (new (#j.PIXI.Loader#))
+      (add name path)
+      (load (lambda ()
+              (push (make-texture-info
+                     :id id
+                     :bitmap-image (gethash name #j.PIXI.utils.TextureCache#))
+                    *texture-info-buffer*))))))
 
-(defun.ps make-texture-load-promise (loader path)
-  (new (-promise
-        (lambda (resolve reject)
-          (if path
-              (loader.load path
-                           (lambda (bitmap-image)
-                             (console.log (+ path " has been loaded"))
-                             (funcall resolve bitmap-image))
-                           (lambda (err)
-                             (console.log err)
-                             (funcall reject err)))
-              (funcall resolve nil))))))
+(defun.ps id-to-name (id)
+  ;; to string
+  (+ "" id))
 
 (defun.ps+ image-loaded-p (image-id)
   (find-tex-info-by-image-id image-id))
@@ -162,19 +128,12 @@
                          :uv-width uv-width
                          :uv-height uv-height)))
 
-;; TODO: unload-texture
+(defun.ps get-texture (id)
+  (let ((tex (gethash (id-to-name id) #j.PIXI.utils.TextureCache#)))
+    (assert tex)
+    (new (#j.PIXI.Texture# tex))))
 
-(defun.ps make-image-geometry (&key width height
-                                    (uv-x 0) (uv-y 0) (uv-width 1) (uv-height 1))
-  (let ((geometry (new (#j.THREE.Geometry#))))
-    (setf geometry.vertices (make-rect-vertices width height 0 0)
-          geometry.faces (make-rect-faces 0)
-          (aref geometry.face-vertex-uvs 0) (make-rect-face-vertex-uvs
-                                             uv-x uv-y uv-width uv-height))
-    (geometry.compute-face-normals)
-    (geometry.compute-vertex-normals)
-    (setf geometry.uvs-need-update t)
-    geometry))
+;; TODO: unload-texture
 
 (defun.ps+ find-image-info-by-image-id (image-id)
   (gethash image-id *image-info-table*))
@@ -184,3 +143,12 @@
     (when img-info
       (gethash (image-info-texture-id img-info)
                *texture-info-table*))))
+
+(defun.ps init-texture-uv (tex ux uy uw uh)
+  (let* ((frame tex.frame)
+         (width frame.width)
+         (height frame.height))
+    (setf tex.frame (new (#j.PIXI.Rectangle# (* width ux)
+                                             (* height uy)
+                                             (* width uw)
+                                             (* height uh))))))

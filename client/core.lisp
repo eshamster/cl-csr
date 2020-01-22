@@ -62,6 +62,3 @@
                     (update-font)
                     (ecs-main)
                     (update-draw renderer))))
-
-(def-top-level-form.ps :run-start-2d-game
-  (console.log "test"))

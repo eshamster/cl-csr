@@ -238,8 +238,7 @@
                  (:draw-text
                   (make-text-mesh :text (gethash :text data)
                                   :font-id (gethash :font-id data)
-                                  :width (gethash :width data)
-                                  :height (gethash :height data)
+                                  :font-size (gethash :font-size data)
                                   :color (gethash :color data))))))
     (update-common-mesh-params mesh data)
     mesh))

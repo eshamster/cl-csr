@@ -170,10 +170,10 @@
                           :param-table (init-table-by-params
                                         id image-id x y depth color width height rotate)))))
 
-(defun draw-text (&key id font-name text x y depth color width height)
+(defun draw-text (&key id font-name text x y depth color font-size)
   "The font-name should be registered by cl-csr:load-font"
   (let ((font-id (get-font-id font-name)))
     (setf (gethash id *draw-info-table*)
           (make-draw-info :sender #'send-draw-text
                           :param-table (init-table-by-params
-                                        id font-id text x y depth color width height)))))
+                                        id font-id text x y depth color font-size)))))

@@ -12,8 +12,7 @@
                 :load-texture
                 :load-image
                 :make-image-uv
-                :load-font
-                :calc-text-width))
+                :load-font))
 (in-package :sample-cl-csr/sample-texture)
 
 (defun start-texture ()
@@ -38,13 +37,8 @@
               :texture-name :multiple-image
               :uv (make-image-uv :x 0.5 :width 0.5))
 
-  (unless t
-    (load-texture :name :sample-font
-                  :path "font.png"
-                  :alpha-path "font_alpha.png")
-    (load-font :name :sample-font
-               :texture-name :sample-font
-               :json-path "font.json"))
+  (load-font :name :sample-font
+             :font-name "Arial")
 
   (start-game-loop :update-func (lambda () (update)))
   (set-screen-size :width 800 :height 600))
@@ -83,14 +77,11 @@
                 :width 50 :height 50
                 :rotate (* 1/10 *temp-counter*)
                 :depth 0 :color #xffffff)
-    (let ((height 60)
+    (let ((font-size 24)
           (text "Press z/Z key"))
       (draw-text :id (incf id)
                  :text text
                  :font-name :sample-font
                  :x 50 :y 50
-                 :width (calc-text-width :font-name :sample-font
-                                         :text text
-                                         :height height)
-                 :height height
+                 :font-size font-size
                  :depth 0 :color #xffffff))))

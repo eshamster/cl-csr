@@ -236,10 +236,12 @@
 ;; text ;;
 
 (def-sender send-load-font :load-font ()
-            texture-id font-id font-info-json-path)
+            font-id font-name)
 
 (def-sender send-draw-text :draw-text (:include send-draw-message)
-            text font-id width height)
+            text font-id font-size
+            ;; TODO: align-horiz align-vert
+            )
 
 ;; - screen size - ;;
 

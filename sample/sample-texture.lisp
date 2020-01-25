@@ -37,9 +37,6 @@
               :texture-name :multiple-image
               :uv (make-image-uv :x 0.5 :width 0.5))
 
-  (load-font :name :sample-font
-             :font-name "Arial")
-
   (start-game-loop :update-func (lambda () (update)))
   (set-screen-size :width 800 :height 600))
 
@@ -76,12 +73,4 @@
                 :x 520 :y 300
                 :width 50 :height 50
                 :rotate (* 1/10 *temp-counter*)
-                :depth 0 :color #xffffff)
-    (let ((font-size 24)
-          (text "Press z/Z key"))
-      (draw-text :id (incf id)
-                 :text text
-                 :font-name :sample-font
-                 :x 50 :y 50
-                 :font-size font-size
-                 :depth 0 :color #xffffff))))
+                :depth 0 :color #xffffff)))

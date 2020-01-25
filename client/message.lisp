@@ -10,10 +10,17 @@
                 :make-solid-circle
                 :make-wired-circle
                 :make-line
-                :make-arc)
+                :make-arc
+
+                :model
+                :make-model
+                :model-graphics
+                :model-offset-x
+                :model-offset-y
+                :set-model-pos)
   (:import-from :cl-csr/client/font
                 :interpret-font-message
-                :make-text-mesh)
+                :make-text-model)
   (:import-from :cl-csr/protocol
                 :code-to-name
                 :name-to-code
@@ -188,60 +195,65 @@
 (defstruct.ps+ draw-info
   kind
   data ; hash table
-  mesh)
+  model)
+
+(defun.ps+ get-graphics (draw-info)
+  (model-graphics (draw-info-model draw-info)))
 
 (defvar.ps+ *draw-info-table* (make-hash-table)
   "Key: id, Value: draw-info")
 
-(defun.ps update-common-mesh-params (mesh data-table)
-  (mesh.position.set (gethash :x data-table)
-                     (gethash :y data-table))
+(defun.ps+ set-model-params (model data-table)
+  (set-model-pos :model model
+                 :x (gethash :x data-table)
+                 :y (gethash :y data-table)
+                 :rotation (gethash :rotate data-table))
   ;; TODO: set z-index (gethash :depth data-table)
-  (let ((rotate (gethash :rotate data-table)))
-    (when rotate
-      (setf mesh.rotation rotate))))
+)
 
-(defun.ps+ make-mesh-by-command (command)
+(defun.ps+ make-model-by-command (command)
   (let* ((kind (code-to-name (gethash :kind command)))
          (data (gethash :data command))
-         (mesh (ecase kind
-                 (:draw-circle
-                  (if (number-to-bool (gethash :fill-p data))
-                      (make-solid-circle :r (gethash :r data)
-                                         :color (gethash :color data))
-                      (make-wired-circle :r (gethash :r data)
-                                         :color (gethash :color data))))
-                 (:draw-rect
-                  (if (number-to-bool (gethash :fill-p data))
-                      (make-solid-rect :width (gethash :width data)
-                                       :height (gethash :height data)
-                                       :color (gethash :color data))
-                      (make-wired-rect :width (gethash :width data)
-                                       :height (gethash :height data)
-                                       :color (gethash :color data))))
-                 (:draw-line
-                  (make-line :pos-a (list (gethash :x1 data)
-                                          (gethash :y1 data))
-                             :pos-b (list (gethash :x2 data)
-                                          (gethash :y2 data))
+         (model (ecase kind
+                  (:draw-circle
+                   (if (number-to-bool (gethash :fill-p data))
+                       (make-solid-circle :r (gethash :r data)
+                                          :color (gethash :color data))
+                       (make-wired-circle :r (gethash :r data)
+                                          :color (gethash :color data))))
+                  (:draw-rect
+                   (if (number-to-bool (gethash :fill-p data))
+                       (make-solid-rect :width (gethash :width data)
+                                        :height (gethash :height data)
+                                        :color (gethash :color data))
+                       (make-wired-rect :width (gethash :width data)
+                                        :height (gethash :height data)
+                                        :color (gethash :color data))))
+                  (:draw-line
+                   (make-line :pos-a (list (gethash :x1 data)
+                                           (gethash :y1 data))
+                              :pos-b (list (gethash :x2 data)
+                                           (gethash :y2 data))
+                              :color (gethash :color data)))
+                  (:draw-arc
+                   (make-arc :start-angle (gethash :start-angle data)
+                             :sweep-angle (gethash :sweep-angle data)
+                             :r (gethash :r data)
                              :color (gethash :color data)))
-                 (:draw-arc
-                  (make-arc :start-angle (gethash :start-angle data)
-                            :sweep-angle (gethash :sweep-angle data)
-                            :r (gethash :r data)
-                            :color (gethash :color data)))
-                 (:draw-image
-                  (make-image-mesh :image-id (gethash :image-id data)
-                                   :width (gethash :width data)
-                                   :height (gethash :height data)
-                                   :color (gethash :color data)))
-                 (:draw-text
-                  (make-text-mesh :text (gethash :text data)
-                                  :font-id (gethash :font-id data)
-                                  :font-size (gethash :font-size data)
-                                  :color (gethash :color data))))))
-    (update-common-mesh-params mesh data)
-    mesh))
+                  (:draw-image
+                   (make-image-mesh :image-id (gethash :image-id data)
+                                    :width (gethash :width data)
+                                    :height (gethash :height data)
+                                    :color (gethash :color data)))
+                  (:draw-text
+                   (make-text-model :text (gethash :text data)
+                                    :font-id (gethash :font-id data)
+                                    :font-size (gethash :font-size data)
+                                    :color (gethash :color data)
+                                    :align-horiz (gethash :align-horiz data)
+                                    :align-vert  (gethash :align-vert  data))))))
+    (set-model-params model data)
+    model))
 
 ;; Note: change of color can be achieved without recreating mesh.
 ;;       But currently recreate for easy of programming.
@@ -273,21 +285,22 @@
     (cond ((eq kind :delete-draw-object) ; delete
            (when (gethash id *draw-info-table*)
              (remhash id *draw-info-table*)
-             (remove-graphics renderer (draw-info-mesh prev-info))))
+             (remove-graphics renderer (get-graphics prev-info))))
           ((null prev-info) ; add
-           (let* ((mesh (make-mesh-by-command command)))
+           (let* ((model (make-model-by-command command))
+                  (graphics (model-graphics model)))
              (setf (gethash id *draw-info-table*)
                    (make-draw-info :kind kind
                                    :data data
-                                   :mesh mesh))
-             (add-graphics renderer mesh)))
+                                   :model model))
+             (add-graphics renderer graphics)))
           ((should-recreate-p prev-info kind data) ; recreate
            (remhash id *draw-info-table*)
-           (remove-graphics renderer (draw-info-mesh prev-info))
+           (remove-graphics renderer (get-graphics prev-info))
            (add-or-update-mesh renderer command))
           (t ; simple update
-           (update-common-mesh-params
-            (draw-info-mesh prev-info) data)
+           (set-model-params
+            (draw-info-model prev-info) data)
            (setf (draw-info-data prev-info) data)))))
 
 (defun.ps+ interpret-draw-command (renderer command)

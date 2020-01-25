@@ -240,7 +240,8 @@
 
 (def-sender send-draw-text :draw-text (:include send-draw-message)
             text font-id font-size
-            ;; TODO: align-horiz align-vert
+            align-horiz ; :top :center :bottom
+            align-vert  ; :left :center :right
             )
 
 ;; - screen size - ;;

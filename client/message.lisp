@@ -35,7 +35,7 @@
                 :remove-graphics)
   (:import-from :cl-csr/client/texture
                 :interpret-texture-message
-                :make-image-mesh)
+                :make-image-model)
   (:import-from :cl-csr/utils/buffered-queue
                 :init-buffered-queue
                 :queue-to-buffer
@@ -241,10 +241,10 @@
                              :r (gethash :r data)
                              :color (gethash :color data)))
                   (:draw-image
-                   (make-image-mesh :image-id (gethash :image-id data)
-                                    :width (gethash :width data)
-                                    :height (gethash :height data)
-                                    :color (gethash :color data)))
+                   (make-image-model :image-id (gethash :image-id data)
+                                     :width (gethash :width data)
+                                     :height (gethash :height data)
+                                     :color (gethash :color data)))
                   (:draw-text
                    (make-text-model :text (gethash :text data)
                                     :font-id (gethash :font-id data)

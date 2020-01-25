@@ -4,13 +4,13 @@
         :ps-experiment)
   (:export :update-texture
            :interpret-texture-message
-           :make-image-mesh
-           :make-image-material
+           :make-image-model
            :texture-loaded-p)
   (:import-from :cl-csr/protocol
                 :code-to-name)
   (:import-from :cl-csr/client/graphics
-                :make-solid-rect)
+                :make-solid-rect
+                :make-model)
   (:import-from :cl-csr/client/utils
                 :with-command-data)
   (:import-from :alexandria
@@ -71,7 +71,7 @@
 
 ;; - for drawer - ;;
 
-(defun.ps make-image-mesh (&key image-id width height color)
+(defun.ps make-image-model (&key image-id width height color)
   (flet ((make-sprite ()
            (let* ((img-info (find-image-info-by-image-id image-id))
                   (tex-id (image-info-texture-id img-info))
@@ -91,10 +91,10 @@
              (container.add-child (make-sprite)))
            (lambda () (image-loaded-p image-id)))
           (container.add-child dummy-rect)
-          (return-from make-image-mesh container)))
+          (return-from make-image-model (make-model :graphics container))))
       ;; the case where the texture has been loaded.
       (container.add-child (make-sprite))
-      container)))
+      (make-model :graphics container))))
 
 (defun.ps+ texture-loaded-p (tex-id)
   (gethash tex-id *texture-info-table*))

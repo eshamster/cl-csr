@@ -10,8 +10,8 @@
                 :incf-index-in-frame)
   (:import-from :cl-csr/protocol
                 :send-set-screen-size)
-  (:import-from :cl-csr/ws-server
-                :*target-client-id-list*))
+  (:import-from :cl-csr/client-list-manager
+                :with-sending-to-new-clients))
 (in-package :cl-csr/screen-size)
 
 ;; Note: Assume that screen size is common for all clients.
@@ -25,7 +25,7 @@
 
 (defun update-screen-size ()
   (when (get-new-client-id-list)
-    (let ((*target-client-id-list* (get-new-client-id-list)))
+    (with-sending-to-new-clients ()
       (multiple-value-bind (width height) (get-screen-size)
         (set-screen-size :width width :height height)))))
 

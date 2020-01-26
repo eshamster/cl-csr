@@ -68,8 +68,8 @@
     (setf container.scale.x scale
           container.scale.y scale)
     (multiple-value-bind (width height) (get-screen-size renderer)
-      (setf container.x (- center-x (/ width scale 2))
-            container.y (- center-y (/ height scale 2))))))
+      (setf container.x (- (/ width 2) center-x)
+            container.y (- (/ height 2) center-y)))))
 
 (defun.ps init-renderer (rendered-dom app)
   (let* ((container (new #j.PIXI.Container#))

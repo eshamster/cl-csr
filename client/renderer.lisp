@@ -5,6 +5,7 @@
            :get-screen-scale
            :set-camera
            :init-renderer
+           :update-renderer-after
            :add-graphics
            :remove-graphics
            :graphics-added-p)
@@ -106,3 +107,9 @@
 (defun.ps graphics-added-p (renderer graphics)
   (declare (ignore renderer))
   (when graphics.parent t))
+
+(defun.ps update-renderer-after (renderer)
+  (let ((container (renderer-container renderer)))
+    (container.children.sort
+     (lambda (a b)
+       (- a.z-index b.z-index)))))

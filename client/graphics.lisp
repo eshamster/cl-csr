@@ -36,10 +36,11 @@
   (offset-x 0)
   (offset-y 0))
 
-(defun.ps set-model-pos (&key model x y rotation)
+(defun.ps set-model-pos (&key model x y rotation depth)
   (let ((graphics (model-graphics model)))
     (graphics.position.set (+ x (model-offset-x model))
                            (+ y (model-offset-y model)))
+    (setf graphics.z-index depth)
     (when rotation
       (setf graphics.rotation rotation))))
 

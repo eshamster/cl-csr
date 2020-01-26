@@ -11,7 +11,8 @@
                 :process-message
                 :update-draw)
   (:import-from :cl-csr/client/renderer
-                :init-renderer)
+                :init-renderer
+                :update-renderer-after)
   (:import-from :cl-csr/client/socket
                 :register-socket-on-message)
   (:import-from :cl-csr/client/texture
@@ -61,4 +62,5 @@
                     (update-texture)
                     (update-font)
                     (ecs-main)
-                    (update-draw renderer))))
+                    (update-draw renderer)
+                    (update-renderer-after renderer))))

@@ -207,9 +207,8 @@
   (set-model-pos :model model
                  :x (gethash :x data-table)
                  :y (gethash :y data-table)
-                 :rotation (gethash :rotate data-table))
-  ;; TODO: set z-index (gethash :depth data-table)
-)
+                 :depth (gethash :depth data-table)
+                 :rotation (gethash :rotate data-table)))
 
 (defun.ps+ make-model-by-command (command)
   (let* ((kind (code-to-name (gethash :kind command)))

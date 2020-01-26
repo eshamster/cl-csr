@@ -18,11 +18,14 @@
                 :get-mouse-pos
                 :get-wheel-delta-y
                 :touch-summary-down-p
-                :get-touch-summary-pos))
+                :get-touch-summary-pos
+
+                :set-screen-size))
 (in-package :sample-cl-csr/sample-basic)
 
 (defun start-basic-sample ()
-  (start-game-loop :update-func (lambda () (update))))
+  (start-game-loop :update-func (lambda () (update)))
+  (set-screen-size :width 800 :height 600))
 
 (defun stop-basic-sample ()
   (stop-game-loop))
@@ -38,6 +41,9 @@
 (defvar *temp-r* 50)
 (defvar *temp-max-r* 100)
 (defvar *temp-min-r* 10)
+
+;; TODO: draw regular polygon
+;; TODO: draw lines
 
 (defun update ()
   (incf *temp-counter*)
@@ -104,9 +110,9 @@
 (defun try-keyboard ()
   (dolist (client-id (get-client-id-list))
     (when (key-down-p client-id :up)
-      (incf *temp-y* *temp-speed*))
-    (when (key-down-p client-id :down)
       (decf *temp-y* *temp-speed*))
+    (when (key-down-p client-id :down)
+      (incf *temp-y* *temp-speed*))
     (when (key-down-p client-id :right)
       (incf *temp-x* *temp-speed*))
     (when (key-down-p client-id :left)

@@ -13,6 +13,9 @@
   (:import-from :sample-cl-csr/sample-screen-and-camera
                 :start-screen-and-camera-sample
                 :stop-screen-and-camera-sample)
+  (:import-from :sample-cl-csr/sample-text
+                :start-text
+                :stop-text)
   (:import-from :sample-cl-csr/sample-texture
                 :start-texture
                 :stop-texture)
@@ -96,7 +99,10 @@
                               :stop-proc #'stop-screen-and-camera-sample))
   (set-info :texture
             (make-sample-info :start-proc #'start-texture
-                              :stop-proc #'stop-texture)))
+                              :stop-proc #'stop-texture))
+  (set-info :text
+            (make-sample-info :start-proc #'start-text
+                              :stop-proc #'stop-text)))
 
 (defun get-sample-list ()
   (hash-table-keys *sample-info-table*))

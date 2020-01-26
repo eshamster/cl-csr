@@ -1,18 +1,24 @@
 (defpackage cl-csr/client/renderer
   (:use :cl)
-  (:export :init-screen-size
-           :set-screen-size
-           :get-screen-size
+  (:export :set-screen-size
+           :get-screen-offset
            :get-screen-scale
-           :get-rendered-dom)
-  (:import-from :cl-csr/client/camera
-                :init-camera
-                :set-camera-params)
+           :set-camera
+           :init-renderer
+           :update-renderer-after
+           :add-graphics
+           :remove-graphics
+           :graphics-added-p)
+  (:import-from :parenscript
+                :chain
+                :create
+                :new)
   (:import-from :ps-experiment
                 :defvar.ps
                 :defvar.ps+
                 :defun.ps
                 :defun.ps+
+                :defstruct.ps+
                 :enable-ps-experiment-syntax))
 (in-package :cl-csr/client/renderer)
 
@@ -20,71 +26,90 @@
 
 ;; --- data --- ;;
 
-;; TODO: Fix the following issue
-;; This is a temporal solution to avoid unintentional scroll bar
-;; when the height size eqauls to 100% of the screen height.
-;; In such case, 7px area is appeared both in top and bottom.
-;; But the cause is not revealed.
-(defvar.ps+ *window-height-adjust* 14)
-(defvar.ps+ *resize-to-screen-p* t)
-(defvar.ps+ *rendered-dom* nil)
-(defvar.ps+ *renderer* nil)
-
-;; Note: The values of width (800) and height (600) are temporal.
-;; They are immediately overwritten by ":set-screen-size" operation.
-(defvar.ps+ *screen-width* 800)
-(defvar.ps+ *screen-height* 600)
-(defvar.ps+ *screen-scale* 1)
+(defstruct.ps+ renderer
+    app
+  container
+  screen-scale)
 
 ;; --- interface --- ;;
 
-(defun.ps+ get-screen-size ()
-  (values *screen-width* *screen-height*))
+(defun.ps get-screen-size (renderer)
+  (let ((app (renderer-app renderer)))
+    (values app.renderer.screen.width
+            app.renderer.screen.height)))
 
-(defun.ps+ get-screen-scale ()
-  *screen-scale*)
+(defun.ps get-screen-offset (renderer)
+  (let* ((app (renderer-app renderer))
+         (style app.renderer.view.style))
+    (flet ((parse (val)
+             (parse-int (val.replace "px" "")))))
+    (values (parse style.left)
+            (parse style.top))))
 
-(defun.ps+ get-rendered-dom ()
-  *rendered-dom*)
+(defun.ps get-screen-scale (renderer)
+  (renderer-screen-scale renderer))
 
-(defun.ps set-screen-size (screen-width screen-height)
-  (unless *renderer*
-    (error "The renderer is not initialized. Should call initalize-screen-size before set-screen-size."))
-  (labels ((calc-scale ()
-             (min (/ window.inner-width screen-width)
-                  (/ (- window.inner-height *window-height-adjust*) screen-height)))
-           (set-position-by-size (width height)
-             (setf *rendered-dom*.style.position "absolute"
-                   *rendered-dom*.style.left (+ (/ (- window.inner-width width) 2) "px")
-                   *rendered-dom*.style.top (+ (/ (- window.inner-height height) 2) "px")))
-           (set-size (width height)
-             (*renderer*.set-size width height)
-             (set-position-by-size width height)))
-    (set-camera-params :width screen-width
-                       :height screen-height)
-    (let ((scale (if *resize-to-screen-p* (calc-scale) 1)))
-      (set-size (* screen-width scale)
-                (* screen-height scale))
-      (setf *screen-width* screen-width
-            *screen-height* screen-height
-            *screen-scale* scale))))
+(defun.ps set-screen-size (renderer screen-width screen-height)
+  (let* ((app (renderer-app renderer))
+         (style app.renderer.view.style)
+         (scale (min (/ window.inner-width screen-width)
+                     (/ window.inner-height screen-height)))
+         (width (* screen-width scale))
+         (height (* screen-height scale)))
+    (setf (renderer-screen-scale renderer) scale)
+    (app.renderer.resize screen-width screen-height)
+    (setf style.width (+ width "px")
+          style.height (+ height "px")
+          style.position "absolute"
+          style.left (+ (/ (- window.inner-width width) 2) "px")
+          style.top (+ (/ (- window.inner-height height) 2) "px"))))
 
-(defun.ps init-screen-size (rendered-dom renderer resize-to-screen-p)
-  (setf *rendered-dom* rendered-dom
-        *renderer* renderer
-        *resize-to-screen-p* resize-to-screen-p)
-  (init-camera :offset-x 0
-               :offset-y 0
-               :width *screen-width*
-               :height *screen-height*)
-  (set-screen-size *screen-width* *screen-height*)
-  (let ((resize-timer nil))
-    (window.add-event-listener
-     "resize" (lambda (e)
-                (declare (ignore e))
-                (when resize-timer
-                  (clear-timeout resize-timer))
-                (setf resize-timer
-                      (set-timeout (lambda ()
-                                     (set-screen-size *screen-width* *screen-height*))
-                                   100))))))
+(defun.ps set-camera (renderer center-x center-y scale)
+  (let ((container (renderer-container renderer)))
+    (setf container.scale.x scale
+          container.scale.y scale)
+    (multiple-value-bind (width height) (get-screen-size renderer)
+      (setf container.x (- (/ width 2) center-x)
+            container.y (- (/ height 2) center-y)))))
+
+(defun.ps init-renderer (rendered-dom app)
+  (let* ((container (new #j.PIXI.Container#))
+         (renderer (make-renderer :app app
+                                  :container container)))
+    (app.stage.add-child container)
+    ;; Note: The values of width (0) and height (0) are temporal.
+    ;; They are immediately overwritten by ":set-screen-size" operation just after connecting.
+    (set-screen-size renderer 0 0)
+    (chain rendered-dom (append-child app.view))
+    (setf *rendered-dom* rendered-dom)
+    (let ((resize-timer nil))
+      (window.add-event-listener
+       "resize" (lambda (e)
+                  (declare (ignore e))
+                  (when resize-timer
+                    (clear-timeout resize-timer))
+                  (setf resize-timer
+                        (set-timeout (lambda ()
+                                       (multiple-value-bind (width height)
+                                           (get-screen-size renderer)
+                                         (set-screen-size renderer width height)))
+                                     100)))))
+    renderer))
+
+(defun.ps add-graphics (renderer graphics)
+  (let ((container (renderer-container renderer)))
+    (container.add-child graphics)))
+
+(defun.ps remove-graphics (renderer graphics)
+  (let ((container (renderer-container renderer)))
+    (container.remove-child graphics)))
+
+(defun.ps graphics-added-p (renderer graphics)
+  (declare (ignore renderer))
+  (when graphics.parent t))
+
+(defun.ps update-renderer-after (renderer)
+  (let ((container (renderer-container renderer)))
+    (container.children.sort
+     (lambda (a b)
+       (- a.z-index b.z-index)))))

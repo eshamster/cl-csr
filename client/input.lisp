@@ -4,7 +4,7 @@
   (:import-from :cl-csr/protocol
                 :name-to-code)
   (:import-from :cl-csr/client/renderer
-                :get-rendered-dom
+                :get-screen-offset
                 :get-screen-scale)
   (:import-from :cl-csr/client/socket
                 :send-json-to-server)
@@ -17,16 +17,16 @@
 
 (enable-ps-experiment-syntax)
 
-(defun.ps init-input ()
+(defun.ps init-input (renderer)
   (window.add-event-listener "keydown" on-keydown)
   (window.add-event-listener "keyup" on-keyup)
-  (window.add-event-listener "mouseup" on-mouseup)
-  (window.add-event-listener "mousedown" on-mousedown)
-  (window.add-event-listener "mousemove" on-mousemove)
+  (window.add-event-listener "mouseup" (lambda (e) (on-mouseup e renderer)))
+  (window.add-event-listener "mousedown" (lambda (e) (on-mousedown e renderer)))
+  (window.add-event-listener "mousemove" (lambda (e) (on-mousemove e renderer)))
   (window.add-event-listener "wheel" on-wheel)
-  (window.add-event-listener "touchstart" on-touchstart)
-  (window.add-event-listener "touchend" on-touchend)
-  (window.add-event-listener "touchmove" on-touchmove))
+  (window.add-event-listener "touchstart" (lambda (e) (on-touchstart e renderer)))
+  (window.add-event-listener "touchend" (lambda (e) (on-touchsend e renderer)))
+  (window.add-event-listener "touchmove" (lambda (e) (on-touchmove e renderer))))
 
 ;; --- internal --- ;;
 
@@ -57,12 +57,11 @@
 
 ;; - mouse - ;;
 
-(defun.ps calc-adjusted-input-point (x y)
-  (let* ((renderer (get-rendered-dom))
-         (canvas (renderer.query-selector "canvas"))
-         (scale (get-screen-scale)))
-    (values (floor (/ (- x renderer.offset-left) scale))
-            (floor (/ (+ (- canvas.height y) renderer.offset-top) scale)))))
+(defun.ps+ calc-adjusted-input-point (renderer x y)
+  (let ((scale (get-screen-scale renderer)))
+    (multiple-value-bind (offset-x offset-y) (get-screen-offset renderer)
+      (values (floor (/ (- x offset-x) scale))
+              (floor (/ (- y offset-y) scale))))))
 
 (defun.ps+ mouse-button-to-string (button)
   (case button
@@ -71,23 +70,23 @@
     (2 :rihgt)
     (t button)))
 
-(defun.ps send-mouse-message (kind e)
+(defun.ps send-mouse-message (kind e renderer)
   (multiple-value-bind (x y)
-      (calc-adjusted-input-point e.client-x e.client-y)
+      (calc-adjusted-input-point renderer e.client-x e.client-y)
     (send-json-to-server (ps:create :kind (name-to-code kind)
                                     :data (ps:create
                                            :button (mouse-button-to-string e.button)
                                            :x x
                                            :y y)))))
 
-(defun.ps+ on-mousedown (e)
-  (send-mouse-message :mouse-down e))
+(defun.ps+ on-mousedown (e renderer)
+  (send-mouse-message :mouse-down e renderer))
 
-(defun.ps on-mouseup (e)
-  (send-mouse-message :mouse-up e))
+(defun.ps+ on-mouseup (e renderer)
+  (send-mouse-message :mouse-up e renderer))
 
-(defun.ps on-mousemove (e)
-  (send-mouse-message :mouse-move e))
+(defun.ps+ on-mousemove (e renderer)
+  (send-mouse-message :mouse-move e renderer))
 
 ;; wheel
 
@@ -98,23 +97,24 @@
 
 ;; - touch - ;;
 
-(defun.ps send-touch-message (kind e)
+(defun.ps send-touch-message (kind e renderer)
   (let ((touches
          (loop :for i :from 0 :below e.changed-touches.length
             :collect
               (let ((touch (nth 0 e.changed-touches)))
                 (multiple-value-bind (x y)
-                    (calc-adjusted-input-point (ps:@ touch client-x)
+                    (calc-adjusted-input-point renderer
+                                               (ps:@ touch client-x)
                                                (ps:@ touch client-y))
                   (ps:create :id touch.identifier :x x :y y))))))
     (send-json-to-server (ps:create :kind (name-to-code kind)
                                     :data touches))))
 
-(defun.ps+ on-touchstart (e)
-  (send-touch-message :touch-start e))
+(defun.ps+ on-touchstart (e renderer)
+  (send-touch-message :touch-start e renderer))
 
-(defun.ps+ on-touchend (e)
-  (send-touch-message :touch-end e))
+(defun.ps+ on-touchend (e renderer)
+  (send-touch-message :touch-end e renderer))
 
-(defun.ps on-touchmove (e)
-  (send-touch-message :touch-move e))
+(defun.ps+ on-touchmove (e renderer)
+  (send-touch-message :touch-move e renderer))

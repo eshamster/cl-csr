@@ -1,8 +1,6 @@
 (defpackage cl-csr/client/core
   (:use :cl)
   (:export :output-client-js)
-  (:import-from :cl-csr/client/camera
-                :get-camera)
   (:import-from :cl-csr/client/font
                 :update-font)
   (:import-from :cl-csr/client/frame-counter
@@ -10,12 +8,11 @@
   (:import-from :cl-csr/client/input
                 :init-input)
   (:import-from :cl-csr/client/message
-                :dequeue-draw-commands-list
-                :interpret-draw-command
-                :process-message)
+                :process-message
+                :update-draw)
   (:import-from :cl-csr/client/renderer
-                :init-screen-size
-                :get-screen-size)
+                :init-renderer
+                :update-renderer-after)
   (:import-from :cl-csr/client/socket
                 :register-socket-on-message)
   (:import-from :cl-csr/client/texture
@@ -24,6 +21,7 @@
                 :ecs-main)
   (:import-from :parenscript
                 :chain
+                :create
                 :new
                 :@)
   (:import-from :ps-experiment
@@ -47,44 +45,22 @@
                         :if-does-not-exist :create)
     (princ (with-use-ps-pack (:this)
              (register-socket-on-message #'process-message)
-             (init-input))
+             (let* ((rendered-dom (document.query-selector "#renderer"))
+                    (app (new (#j.PIXI.Application# (create))))
+                    (renderer (init-renderer rendered-dom app)))
+               (init-input renderer)
+               (start-2d-game :app app :renderer renderer)))
            file)))
 
 ;; --- initializer --- ;;
 
-(defun.ps start-2d-game (&key rendered-dom
-                              (resize-to-screen-p t)
-                              (init-function (lambda (scene) nil))
-                              (update-function (lambda (scene) nil)))
-  (let* ((scene (new (#j.THREE.Scene#)))
-         (renderer (new #j.THREE.WebGLRenderer#)))
-    (init-screen-size rendered-dom renderer resize-to-screen-p)
-    (chain rendered-dom
-           (append-child renderer.dom-element))
-    (let ((light (new (#j.THREE.DirectionalLight# 0xffffff))))
-      (light.position.set 0 0.7 0.7)
-      (scene.add light))
-    (funcall init-function scene)
-    (labels ((render-loop ()
-               (request-animation-frame render-loop)
-               (renderer.render scene (get-camera))
-               (update-frame-counter)
-               (update-texture)
-               (update-font)
-               (ecs-main)
-               (funcall update-function scene)))
-      (render-loop))))
-
-(defun.ps clear-scene (scene)
-  (loop :while (> scene.children.length 0)
-     :do (scene.remove (@ scene children 0))))
-
-(defun.ps+ update-draw (scene)
-  (let ((draw-commands-list (dequeue-draw-commands-list)))
-    (dolist (draw-commands draw-commands-list)
-      (dolist (command draw-commands)
-        (interpret-draw-command scene command)))))
-
-(def-top-level-form.ps :run-start-2d-game
-  (start-2d-game :rendered-dom (document.query-selector "#renderer")
-                 :update-function #'update-draw))
+(defun.ps start-2d-game (&key app renderer
+                              ;; TODO: (resize-to-screen-p t)
+                              )
+  (app.ticker.add (lambda ()
+                    (update-frame-counter)
+                    (update-texture)
+                    (update-font)
+                    (ecs-main)
+                    (update-draw renderer)
+                    (update-renderer-after renderer))))

@@ -29,7 +29,9 @@
 
 (defun update-camera-info ()
   (dolist (new-client (get-new-client-id-list))
-    (setf (gethash new-client *camera-info-table*) (init-camera-info)))
+    (setf (gethash new-client *camera-info-table*) (init-camera-info))
+    (multiple-value-bind (width height) (get-camera-center-pos new-client)
+      (set-camera-center-pos new-client width height)))
   (dolist (deleted-client (get-deleted-client-id-list))
     (remhash deleted-client *camera-info-table*)))
 

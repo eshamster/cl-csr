@@ -1,10 +1,7 @@
 (defpackage cl-csr/client/message
   (:use :cl)
-  (:export :dequeue-draw-commands-list
-           :interpret-draw-command
-           :process-message)
-  (:import-from :cl-csr/client/camera
-                :set-camera-params)
+  (:export :process-message
+           :update-draw)
   (:import-from :cl-csr/client/frame-counter
                 :get-frame-count)
   (:import-from :cl-csr/client/graphics
@@ -13,10 +10,17 @@
                 :make-solid-circle
                 :make-wired-circle
                 :make-line
-                :make-arc)
+                :make-arc
+
+                :model
+                :make-model
+                :model-graphics
+                :model-offset-x
+                :model-offset-y
+                :set-model-pos)
   (:import-from :cl-csr/client/font
                 :interpret-font-message
-                :make-text-mesh)
+                :make-text-model)
   (:import-from :cl-csr/protocol
                 :code-to-name
                 :name-to-code
@@ -25,11 +29,13 @@
                 :font-code-p
                 :number-to-bool)
   (:import-from :cl-csr/client/renderer
-                :get-screen-size
-                :set-screen-size)
+                :set-screen-size
+                :set-camera
+                :add-graphics
+                :remove-graphics)
   (:import-from :cl-csr/client/texture
                 :interpret-texture-message
-                :make-image-mesh)
+                :make-image-model)
   (:import-from :cl-csr/utils/buffered-queue
                 :init-buffered-queue
                 :queue-to-buffer
@@ -74,6 +80,7 @@
       (list)))
 
 (defun.ps push-message-to-buffer (parsed-message-list)
+  "Push message to frame buffer and return true if the message is :frame-end"
   (incf *receive-count-in-frame*)
   (let ((frame-end-p nil))
     (dolist (message parsed-message-list)
@@ -140,19 +147,45 @@
 (defun.ps interpret-log-console (command)
   (console.log (@ command :data :message)))
 
+;; - set screen size - ;;
+
+(defstruct.ps+ set-screen-size-info width height)
+
+(defvar.ps+ *set-screen-size-info-list* (list))
+
 (defun.ps interpret-set-screen-size (command)
-  (set-screen-size (@ command :data :width)
-                   (@ command :data :height)))
+  (push (make-set-screen-size-info :width (@ command :data :width)
+                                   :height (@ command :data :height))
+        *set-screen-size-info-list*))
+
+(defun.ps+ update-set-screen (renderer)
+  (dolist (info *set-screen-size-info-list*)
+    (set-screen-size renderer
+                     (set-screen-size-info-width info)
+                     (set-screen-size-info-height info)))
+  (setf *set-screen-size-info-list* (list)))
+
+;; - camera - ;;
+
+(defstruct.ps+ set-camera-info center-x center-y scale)
+
+(defvar.ps+ *set-camera-info-list* (list))
 
 (defun.ps interpret-set-camera-params (command)
-  (let ((center-x (@ command :data :center-x))
-        (center-y (@ command :data :center-y))
-        (scale (@ command :data :scale)))
-    (multiple-value-bind (width height) (get-screen-size)
-      (set-camera-params
-       :offset-x (- center-x (/ width scale 2))
-       :offset-y (- center-y (/ height scale 2))
-       :scale scale))))
+  (push (make-set-camera-info :center-x (@ command :data :center-x)
+                              :center-y (@ command :data :center-y)
+                              :scale (@ command :data :scale))
+        *set-camera-info-list*))
+
+(defun.ps+ update-camera (renderer)
+  (dolist (info *set-camera-info-list*)
+    (set-camera renderer
+                (set-camera-info-center-x info)
+                (set-camera-info-center-y info)
+                (set-camera-info-scale info)))
+  (setf *set-camera-info-list* (list)))
+
+;; - - ;;
 
 (defun.ps interpret-set-fps (command)
   (setf *server-fps* (@ command :data :value)))
@@ -162,67 +195,64 @@
 (defstruct.ps+ draw-info
   kind
   data ; hash table
-  mesh)
+  model)
+
+(defun.ps+ get-graphics (draw-info)
+  (model-graphics (draw-info-model draw-info)))
 
 (defvar.ps+ *draw-info-table* (make-hash-table)
   "Key: id, Value: draw-info")
 
-(defun.ps update-common-mesh-params (mesh data-table)
-  (mesh.position.set (gethash :x data-table)
-                     (gethash :y data-table)
-                     (gethash :depth data-table))
-  (let ((rotate (gethash :rotate data-table)))
-    (when rotate
-      (setf mesh.rotation.z rotate))))
+(defun.ps+ set-model-params (model data-table)
+  (set-model-pos :model model
+                 :x (gethash :x data-table)
+                 :y (gethash :y data-table)
+                 :depth (gethash :depth data-table)
+                 :rotation (gethash :rotate data-table)))
 
-(defun.ps+ make-mesh-by-command (command)
+(defun.ps+ make-model-by-command (command)
   (let* ((kind (code-to-name (gethash :kind command)))
          (data (gethash :data command))
-         (mesh (ecase kind
-                 (:draw-circle
-                  (if (number-to-bool (gethash :fill-p data))
-                      (make-solid-circle :r (gethash :r data)
-                                         :color (gethash :color data))
-                      (make-wired-circle :r (gethash :r data)
-                                         :color (gethash :color data))))
-                 (:draw-rect
-                  (if (number-to-bool (gethash :fill-p data))
-                      (make-solid-rect :width (gethash :width data)
-                                       :height (gethash :height data)
-                                       :color (gethash :color data))
-                      (make-wired-rect :width (gethash :width data)
-                                       :height (gethash :height data)
-                                       :color (gethash :color data))))
-                 (:draw-line
-                  (make-line :pos-a (list (gethash :x1 data)
-                                          (gethash :y1 data))
-                             :pos-b (list (gethash :x2 data)
-                                          (gethash :y2 data))
+         (model (ecase kind
+                  (:draw-circle
+                   (if (number-to-bool (gethash :fill-p data))
+                       (make-solid-circle :r (gethash :r data)
+                                          :color (gethash :color data))
+                       (make-wired-circle :r (gethash :r data)
+                                          :color (gethash :color data))))
+                  (:draw-rect
+                   (if (number-to-bool (gethash :fill-p data))
+                       (make-solid-rect :width (gethash :width data)
+                                        :height (gethash :height data)
+                                        :color (gethash :color data))
+                       (make-wired-rect :width (gethash :width data)
+                                        :height (gethash :height data)
+                                        :color (gethash :color data))))
+                  (:draw-line
+                   (make-line :pos-a (list (gethash :x1 data)
+                                           (gethash :y1 data))
+                              :pos-b (list (gethash :x2 data)
+                                           (gethash :y2 data))
+                              :color (gethash :color data)))
+                  (:draw-arc
+                   (make-arc :start-angle (gethash :start-angle data)
+                             :sweep-angle (gethash :sweep-angle data)
+                             :r (gethash :r data)
                              :color (gethash :color data)))
-                 (:draw-arc
-                  (make-arc :start-angle (gethash :start-angle data)
-                            :sweep-angle (gethash :sweep-angle data)
-                            :r (gethash :r data)
-                            :color (gethash :color data)))
-                 (:draw-image
-                  (make-image-mesh :image-id (gethash :image-id data)
-                                   :width (gethash :width data)
-                                   :height (gethash :height data)
-                                   :color (gethash :color data)))
-                 (:draw-text
-                  (make-text-mesh :text (gethash :text data)
-                                  :font-id (gethash :font-id data)
-                                  :width (gethash :width data)
-                                  :height (gethash :height data)
-                                  :color (gethash :color data))))))
-    (update-common-mesh-params mesh data)
-    mesh))
-
-(defun.ps add-mesh-to-scene (scene mesh)
-  (scene.add mesh))
-
-(defun.ps remove-mesh-from-scene (scene mesh)
-  (scene.remove mesh))
+                  (:draw-image
+                   (make-image-model :image-id (gethash :image-id data)
+                                     :width (gethash :width data)
+                                     :height (gethash :height data)
+                                     :color (gethash :color data)))
+                  (:draw-text
+                   (make-text-model :text (gethash :text data)
+                                    :font-id (gethash :font-id data)
+                                    :font-size (gethash :font-size data)
+                                    :color (gethash :color data)
+                                    :align-horiz (gethash :align-horiz data)
+                                    :align-vert  (gethash :align-vert  data))))))
+    (set-model-params model data)
+    model))
 
 ;; Note: change of color can be achieved without recreating mesh.
 ;;       But currently recreate for easy of programming.
@@ -246,7 +276,7 @@
              (not (eq-params :width :height :color :text :font-id)))
             (t t))))))
 
-(defun.ps+ add-or-update-mesh (scene command)
+(defun.ps+ add-or-update-mesh (renderer command)
   (let* ((kind (code-to-name (gethash :kind command)))
          (data (gethash :data command))
          (id (gethash :id data))
@@ -254,22 +284,31 @@
     (cond ((eq kind :delete-draw-object) ; delete
            (when (gethash id *draw-info-table*)
              (remhash id *draw-info-table*)
-             (remove-mesh-from-scene scene (draw-info-mesh prev-info))))
+             (remove-graphics renderer (get-graphics prev-info))))
           ((null prev-info) ; add
-           (let* ((mesh (make-mesh-by-command command)))
+           (let* ((model (make-model-by-command command))
+                  (graphics (model-graphics model)))
              (setf (gethash id *draw-info-table*)
                    (make-draw-info :kind kind
                                    :data data
-                                   :mesh mesh))
-             (add-mesh-to-scene scene mesh)))
+                                   :model model))
+             (add-graphics renderer graphics)))
           ((should-recreate-p prev-info kind data) ; recreate
            (remhash id *draw-info-table*)
-           (remove-mesh-from-scene scene (draw-info-mesh prev-info))
-           (add-or-update-mesh scene command))
+           (remove-graphics renderer (get-graphics prev-info))
+           (add-or-update-mesh renderer command))
           (t ; simple update
-           (update-common-mesh-params
-            (draw-info-mesh prev-info) data)
+           (set-model-params
+            (draw-info-model prev-info) data)
            (setf (draw-info-data prev-info) data)))))
 
-(defun.ps+ interpret-draw-command (scene command)
-  (add-or-update-mesh scene command))
+(defun.ps+ interpret-draw-command (renderer command)
+  (add-or-update-mesh renderer command))
+
+(defun.ps+ update-draw (renderer)
+  (let ((draw-commands-list (dequeue-draw-commands-list)))
+    (dolist (draw-commands draw-commands-list)
+      (dolist (command draw-commands)
+        (interpret-draw-command renderer command))))
+  (update-set-screen renderer)
+  (update-camera renderer))

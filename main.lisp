@@ -66,8 +66,6 @@
            :make-src-list-for-script-tag
            ;; ws-server
            :*target-client-id-list*
-           :register-callback-on-connecting
-           :register-callback-on-disconnecting
            ;; client-list-manager
            :get-new-client-id-list
            :get-deleted-client-id-list

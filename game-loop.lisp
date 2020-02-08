@@ -36,9 +36,6 @@
                 :update-screen-size)
   (:import-from :cl-csr/texture
                 :update-texture)
-  (:import-from :cl-csr/ws-server
-                :send-from-server
-                :*target-client-id-list*)
   (:import-from :alexandria
                 :make-keyword
                 :with-gensyms)

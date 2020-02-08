@@ -8,29 +8,17 @@
            :with-sending-to-new-clients)
   (:import-from :cl-csr/ws-server
                 :*target-client-id-list*
-                :register-callback-on-connecting
-                :register-callback-on-disconnecting))
+                :*ws-server*
+                :pop-new-client-ids
+                :pop-deleted-client-ids))
 (in-package :cl-csr/client-list-manager)
-
-;; TODO: should lock buffers
-
-;; --- registration --- ;;
-
-(register-callback-on-connecting
- 'detect-new-client (lambda (client-id)
-                      (pushnew client-id *new-client-list-buffer*)))
-
-(register-callback-on-disconnecting
- 'detect-deleted-client (lambda (client-id)
-                          (pushnew client-id *deleted-client-list-buffer*)))
 
 ;; --- interface --- ;;
 
 (defun update-client-list ()
-  (setf *new-client-list* *new-client-list-buffer*
-        *new-client-list-buffer* nil
-        *deleted-client-list* *deleted-client-list-buffer*
-        *deleted-client-list-buffer* nil)
+  (let ((ws-server *ws-server*))
+    (setf *new-client-list* (pop-new-client-ids ws-server)
+          *deleted-client-list* (pop-deleted-client-ids ws-server)))
   (setf *client-list* (append *client-list* *new-client-list*))
   (dolist (deleted-id *deleted-client-list*)
     (setf *client-list* (delete deleted-id *client-list*))))
@@ -58,13 +46,6 @@
 
 
 (defvar *new-client-list* nil)
-(defvar *new-client-list-buffer* nil)
-
 (defvar *deleted-client-list* nil)
-(defvar *deleted-client-list-buffer* nil)
 
 (defvar *client-list* nil)
-
-(register-callback-on-connecting
- 'add-new-client-list-to-buffer
- (lambda (client-id) (push client-id *new-client-list-buffer*)))

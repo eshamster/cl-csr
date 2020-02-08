@@ -1,14 +1,18 @@
 (defpackage cl-csr/ws-server
   (:use :cl)
   (:export :make-ws-app
-           :*ws-server* ; TODO: remove
+           :get-ws-server
            :send-from-server
-           :register-message-processor
            :*target-client-id-list*
            :same-target-client-list-p
            :copy-target-client-id-list
            :pop-new-client-ids
-           :pop-deleted-client-ids)
+           :pop-deleted-client-ids
+           :pop-client-messages
+
+           :client-message
+           :client-message-client-id
+           :client-message-message)
   (:import-from :bordeaux-threads
                 :make-lock
                 :with-lock-held)
@@ -22,6 +26,11 @@
                 :ready-state))
 (in-package :cl-csr/ws-server)
 
+(defstruct client-message
+  client-id
+  message ; represented as a hash table
+  )
+
 (defclass ws-server ()
   ((new-client-id-list :initform nil
                        :accessor wss-new-client-id-list)
@@ -30,23 +39,39 @@
    (deleted-client-id-list :initform nil
                            :accessor wss-deleted-client-id-list)
    (lock-for-deleted :initform (make-lock "Lock for deleted client id list")
-                     :reader wss-lock-for-deleted)))
+                     :reader wss-lock-for-deleted)
+   (client-message-list :initform nil
+                        :accessor wss-client-message-list)
+   (lock-for-message :initform (make-lock "Lock for client message")
+                     :reader wss-lock-for-message)))
 
 (defmethod pop-new-client-ids ((wss ws-server))
-  (let ((ids (wss-new-client-id-list wss)))
+  (symbol-macrolet ((ids (wss-new-client-id-list wss)))
     (when ids
       (with-lock-held ((wss-lock-for-new wss))
-        (setf (wss-new-client-id-list wss) nil))
-      ids)))
+        (let ((res ids))
+          (setf ids nil)
+          res)))))
 
 (defmethod pop-deleted-client-ids ((wss ws-server))
-  (let ((ids (wss-deleted-client-id-list wss)))
+  (symbol-macrolet ((ids (wss-deleted-client-id-list wss)))
     (when ids
       (with-lock-held ((wss-lock-for-deleted wss))
-        (setf (wss-deleted-client-id-list wss) nil))
-      ids)))
+        (let ((res ids))
+          (setf ids nil)
+          res)))))
+
+(defmethod pop-client-messages ((wss ws-server))
+  (symbol-macrolet ((messages (wss-client-message-list wss)))
+    (when messages
+      (with-lock-held ((wss-lock-for-deleted wss))
+        (let ((res messages))
+          (setf messages nil)
+          res)))))
 
 (defvar *ws-server* (make-instance 'ws-server))
+
+(defun get-ws-server () *ws-server*)
 
 (defvar *target-client-id-list* :all
   "If ':all', a message is sent to all clients.
@@ -73,20 +98,13 @@ Otherwise, it is sent to the listed clients.")
 
 (defvar *client-info-list* nil)
 
-(defvar *message-processor-table* (make-hash-table))
-
-(defun register-message-processor (id-as-symbol callback)
-  "The callback should take 2 arguments.
-The first is an id of client.
-The second is a message represented as a hash table."
-  (setf (gethash id-as-symbol *message-processor-table*) callback))
-
 (defun make-ws-app ()
   (lambda (env)
     (let* ((server (make-server env))
            (client-info (make-client-info :target-server server))
            (client-id (client-info-id client-info))
            (ws-server *ws-server*))
+      (check-type ws-server ws-server)
       (push client-info *client-info-list*)
       (with-lock-held ((wss-lock-for-new ws-server))
         (push client-id (wss-new-client-id-list ws-server)))
@@ -109,10 +127,9 @@ The second is a message represented as a hash table."
                          result)))
               (let* ((temp-table (parse json-string :as :hash-table))
                      (parsed-table (parse-table temp-table)))
-                (maphash (lambda (key callback)
-                           (declare (ignore key))
-                           (funcall callback client-id parsed-table))
-                         *message-processor-table*)))))
+                (push (make-client-message :client-id client-id
+                                           :message parsed-table)
+                      (wss-client-message-list ws-server))))))
       (lambda (responder)
         (declare (ignore responder))
         (format t "~&Connection started: ~D" client-id)

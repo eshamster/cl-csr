@@ -8,7 +8,7 @@
            :with-sending-to-new-clients)
   (:import-from :cl-csr/ws-server
                 :*target-client-id-list*
-                :*ws-server*
+                :get-ws-server
                 :pop-new-client-ids
                 :pop-deleted-client-ids))
 (in-package :cl-csr/client-list-manager)
@@ -16,7 +16,7 @@
 ;; --- interface --- ;;
 
 (defun update-client-list ()
-  (let ((ws-server *ws-server*))
+  (let ((ws-server (get-ws-server)))
     (setf *new-client-list* (pop-new-client-ids ws-server)
           *deleted-client-list* (pop-deleted-client-ids ws-server)))
   (setf *client-list* (append *client-list* *new-client-list*))

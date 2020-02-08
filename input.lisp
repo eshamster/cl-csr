@@ -34,51 +34,54 @@
                 :name-to-code
                 :code-to-name)
   (:import-from :cl-csr/ws-server
-                :register-message-processor)
+                :get-ws-server
+                :pop-client-messages
+                :client-message-client-id
+                :client-message-message)
   (:import-from :alexandria
                 :make-keyword
                 :ensure-gethash
                 :hash-table-values))
 (in-package :cl-csr/input)
 
-(progn
-  (defun process-input-message (client-id message-table)
-    (let ((kind (code-to-name (gethash :kind message-table)))
-          (data (gethash :data message-table)))
-      (case kind
-        ((:key-down :key-up)
-         (set-client-raw-key-state
-          client-id (make-keyword (string-upcase (gethash :key data)))
-          (eq kind :key-down)))
-        ((:mouse-down :mouse-up)
-         (let ((raw-button (gethash :button data)))
-           ;; If raw-button is not string, the button is not implemented yet.
-           (when (stringp raw-button)
-             (let* ((button (make-keyword (string-upcase raw-button)))
-                    (key-name (mouse-button-to-key-name button)))
-               (when key-name
-                 (set-client-raw-key-state
-                  client-id key-name (eq kind :mouse-down))))))
-         (update-mouse-pos-buffer
-          client-id
-          (gethash :x data)
-          (gethash :y data)))
-        (:mouse-move
-         (update-mouse-pos-buffer
-          client-id
-          (gethash :x data)
-          (gethash :y data)))
-        (:mouse-wheel
-         (update-mouse-wheel-buffer
-          client-id
-          (gethash :delta-y data)))
-        ((:touch-start :touch-end :touch-move)
-         (update-touch-info-by-event client-id kind data))
-        (t (print-nested-hash-table message-table)))))
-
-  (register-message-processor 'input-processor #'process-input-message))
+(defun process-input-message (client-id message-table)
+  (let ((kind (code-to-name (gethash :kind message-table)))
+        (data (gethash :data message-table)))
+    (case kind
+      ((:key-down :key-up)
+       (set-client-raw-key-state
+        client-id (make-keyword (string-upcase (gethash :key data)))
+        (eq kind :key-down)))
+      ((:mouse-down :mouse-up)
+       (let ((raw-button (gethash :button data)))
+         ;; If raw-button is not string, the button is not implemented yet.
+         (when (stringp raw-button)
+           (let* ((button (make-keyword (string-upcase raw-button)))
+                  (key-name (mouse-button-to-key-name button)))
+             (when key-name
+               (set-client-raw-key-state
+                client-id key-name (eq kind :mouse-down))))))
+       (update-mouse-pos-buffer
+        client-id
+        (gethash :x data)
+        (gethash :y data)))
+      (:mouse-move
+       (update-mouse-pos-buffer
+        client-id
+        (gethash :x data)
+        (gethash :y data)))
+      (:mouse-wheel
+       (update-mouse-wheel-buffer
+        client-id
+        (gethash :delta-y data)))
+      ((:touch-start :touch-end :touch-move)
+       (update-touch-info-by-event client-id kind data))
+      (t (print-nested-hash-table message-table)))))
 
 (defun update-input ()
+  (dolist (message (pop-client-messages (get-ws-server)))
+    (process-input-message (client-message-client-id message)
+                           (client-message-message message)))
   ;; - delete - ;;
   (dolist (client-id (get-deleted-client-id-list))
     (print 'test)

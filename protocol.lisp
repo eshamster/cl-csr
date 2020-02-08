@@ -24,6 +24,7 @@
            :bool-to-number
            :number-to-bool)
   (:import-from :cl-csr/ws-server
+                :get-ws-server
                 :send-from-server
                 :*target-client-id-list*
                 :same-target-client-list-p
@@ -139,7 +140,7 @@
     data))
 
 (defun send-messages-in-buffer ()
-  (send-from-server (to-json *message-buffer*))
+  (send-from-server (get-ws-server) (to-json *message-buffer*))
   (setf *message-buffer* nil))
 
 (defun send-message (kind-name frame index-in-frame data)

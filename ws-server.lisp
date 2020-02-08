@@ -1,6 +1,6 @@
 (defpackage cl-csr/ws-server
   (:use :cl)
-  (:export :*ws-app*
+  (:export :make-ws-app
            :*ws-server* ; TODO: remove
            :send-from-server
            :register-message-processor
@@ -81,7 +81,7 @@ The first is an id of client.
 The second is a message represented as a hash table."
   (setf (gethash id-as-symbol *message-processor-table*) callback))
 
-(defparameter *ws-app*
+(defun make-ws-app ()
   (lambda (env)
     (let* ((server (make-server env))
            (client-info (make-client-info :target-server server))

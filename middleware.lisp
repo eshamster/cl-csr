@@ -2,7 +2,7 @@
   (:use :cl)
   (:export :make-client-side-rendering-middleware)
   (:import-from :cl-csr/ws-server
-                :*ws-app*)
+                :make-ws-app)
   (:import-from :cl-csr/client/core
                 :output-client-js)
   (:import-from :cl-csr/texture
@@ -21,7 +21,7 @@
       (output-client-js (merge-pathnames "js/client.js" resource-root))
       (let ((uri (getf env :request-uri)))
         (if (string= uri "/ws")
-            (funcall *ws-app* env)
+            (funcall (make-ws-app) env)
             (funcall (make-static-middleware
                       app
                       :resource-root resource-root

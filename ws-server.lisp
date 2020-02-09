@@ -24,8 +24,10 @@
 
 (defgeneric pop-new-client-ids (ws-server))
 (defgeneric pop-deleted-client-ids (ws-server))
-(defgeneric pop-client-messages (ws-server))
-(defgeneric send-from-server (ws-server message))
+(defgeneric pop-client-messages (ws-server)
+  (:documentation "each message is an instance of client-message structure"))
+(defgeneric send-from-server (ws-server message)
+  (:documentation "message is represented as a list of nested hash tables"))
 
 (defvar *ws-server* nil)
 (defun get-ws-server () *ws-server*)

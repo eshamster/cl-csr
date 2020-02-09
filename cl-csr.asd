@@ -40,7 +40,8 @@
   :class :package-inferred-system
   :depends-on (:cl-csr
                :rove
-               "ps-experiment/t/test-utils"
                "cl-csr/t/utils/buffered-queue"
-               "cl-csr/t/utils/input")
+               "cl-csr/t/utils/input"
+               "cl-csr/t/utils/list"
+               "cl-csr/t/utils/hash-table")
   :perform (test-op (o c) (symbol-call :rove '#:run c)))

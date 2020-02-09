@@ -29,6 +29,8 @@
                 :*target-client-id-list*
                 :same-target-client-list-p
                 :copy-target-client-id-list)
+  (:import-from :cl-csr/utils/list
+                :plist-to-nested-hash-table)
   (:import-from :alexandria
                 :appendf
                 :make-keyword)
@@ -123,24 +125,8 @@
 (defvar *message-buffer* nil)
 (defparameter *max-message-buffer* 10) ; Not well-considered value
 
-(defun down-case-keyword (data)
-  (labels ((down (keyword)
-             (intern (string-downcase (symbol-name keyword))
-                     "KEYWORD"))
-           (rec (lst)
-             (symbol-macrolet ((head (car lst)))
-               (if (listp head)
-                   (when head
-                     (rec head))
-                   (when (keywordp head)
-                     (setf head (down head)))))
-             (when (cdr lst)
-               (rec (cdr lst)))))
-    (rec data)
-    data))
-
 (defun send-messages-in-buffer ()
-  (send-from-server (get-ws-server) (to-json *message-buffer*))
+  (send-from-server (get-ws-server) *message-buffer*)
   (setf *message-buffer* nil))
 
 (defun send-message (kind-name frame index-in-frame data)
@@ -149,10 +135,10 @@
     (let ((*target-client-id-list* *pre-target-client-id-list*))
       (send-messages-in-buffer)))
   (setf *pre-target-client-id-list* (copy-target-client-id-list))
-  (push (down-case-keyword `(:kind ,(name-to-code kind-name)
-                             :frame ,frame
-                             :no ,index-in-frame
-                             :data ,data))
+  (push (plist-to-nested-hash-table `(:kind ,(name-to-code kind-name)
+                                            :frame ,frame
+                                            :no ,index-in-frame
+                                            :data ,data))
         *message-buffer*)
   (when (or (eq kind-name :frame-end)
             (>= (length *message-buffer*) *max-message-buffer*))

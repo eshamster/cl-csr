@@ -10,11 +10,14 @@
                 :pop-deleted-client-ids
                 :pop-client-messages
                 :make-client-message)
+  (:import-from :cl-csr/utils/hash-table
+                :downcase-hash-keys)
   (:import-from :bordeaux-threads
                 :make-lock
                 :with-lock-held)
   (:import-from :jonathan
-                :parse)
+                :parse
+                :to-json)
   (:import-from :websocket-driver
                 :make-server
                 :on
@@ -109,7 +112,9 @@
              (case (ready-state server)
                (:open (when (or (eq *target-client-id-list* :all)
                                 (find id *target-client-id-list*))
-                        (send server message)))
+                        ;; Note: Parenscript converts ":a" to "a" not to "A".
+                        ;; To read message by ":a" in Parenscript downcasing is requried.
+                        (send server (to-json (mapcar #'downcase-hash-keys message)))))
                (:closed (format t "~&Connection closed: ~D" id)
                         (remhash id (wss-client-id-to-server wss))
                         (with-lock-held ((wss-lock-for-deleted wss))

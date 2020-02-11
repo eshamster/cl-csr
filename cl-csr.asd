@@ -40,8 +40,9 @@
   :class :package-inferred-system
   :depends-on (:cl-csr
                :rove
+               "cl-csr/t/mock/ws-client-mock"
                "cl-csr/t/utils/buffered-queue"
+               "cl-csr/t/utils/hash-table"
                "cl-csr/t/utils/input"
-               "cl-csr/t/utils/list"
-               "cl-csr/t/utils/hash-table")
+               "cl-csr/t/utils/list")
   :perform (test-op (o c) (symbol-call :rove '#:run c)))

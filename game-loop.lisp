@@ -74,13 +74,13 @@
                               (when *stop-game-loop-p*
                                 (return))
                               (update-client-list)
-                              (update-texture)
                               (incf-frame-count)
-                              (update-camera-info)
-                              (update-input)
                               (unwind-protect
                                    (progn
                                      (send-frame-start (get-frame-count) (incf-index-in-frame))
+                                     (update-texture)
+                                     (update-camera-info)
+                                     (update-input)
                                      (update-fps)
                                      (update-screen-size)
                                      (funcall update-func)

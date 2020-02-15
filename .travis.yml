@@ -1,21 +1,13 @@
-language: lisp
-sudo: false
+services:
+  - docker
 
 env:
-  global:
-    - PATH=~/.roswell/bin:$PATH
-    - ROSWELL_INSTALL_DIR=$HOME/.roswell
-    - COVERAGE_EXCLUDE=t
   matrix:
-    - LISP=sbcl-bin COVERALLS=true
+    - LISP=sbcl-bin
     - LISP=ccl-bin
 
-install:
-  - curl -L https://raw.githubusercontent.com/snmsts/roswell/release/scripts/install-for-ci.sh | sh
-  - ros install eshamster/ps-experiment
-  - ros install eshamster/cl-ps-ecs
-  - ros install fukamachi/rove
-  - ros -e '(ql:register-local-projects)' -q
+before_install:
+  - docker build -t test test-docker
 
 script:
-  - rove cl-csr.asd
+  - test-docker/run.sh

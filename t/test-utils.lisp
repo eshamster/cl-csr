@@ -3,6 +3,7 @@
         :rove)
   (:export :expected-kind-seq-p
            :expected-client-messages-p
+           :with-mock-ws-server
            :make-dummy-message
            :make-dummy-client-message)
   (:import-from :cl-csr/protocol
@@ -12,7 +13,10 @@
                 :client-message
                 :make-client-message
                 :client-message-client-id
-                :client-message-message))
+                :client-message-message
+                :with-ws-server)
+  (:import-from :cl-csr/mock/ws-server-mock
+                :make-ws-server-mock))
 (in-package :cl-csr/t/test-utils)
 
 (defun make-dummy-message (kind)
@@ -24,6 +28,13 @@
 (defun make-dummy-client-message (client-id kind)
   (make-client-message :client-id client-id
                        :message (make-dummy-message kind)))
+
+;; --- ;;
+
+(defmacro with-mock-ws-server ((server-var) &body body)
+  `(let ((,server-var (make-ws-server-mock)))
+     (with-ws-server (,server-var)
+       ,@body)))
 
 ;; --- ;;
 

@@ -46,5 +46,6 @@
                "cl-csr/t/utils/hash-table"
                "cl-csr/t/utils/input"
                "cl-csr/t/utils/list"
+               "cl-csr/t/frame-counter"
                "cl-csr/t/test-utils")
   :perform (test-op (o c) (symbol-call :rove '#:run c)))

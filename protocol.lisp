@@ -34,8 +34,6 @@
   (:import-from :alexandria
                 :appendf
                 :make-keyword)
-  (:import-from :jonathan
-                :to-json)
   (:import-from :ps-experiment
                 :defvar.ps+
                 :defun.ps+

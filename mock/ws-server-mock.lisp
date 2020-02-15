@@ -46,11 +46,12 @@
     (setf (wss-client-message-list wss) nil)
     (nreverse messages)))
 
-(defmethod send-from-server ((wss ws-server-mock) (message hash-table))
+(defmethod send-from-server ((wss ws-server-mock) messages)
   (maphash (lambda (id client)
              (when (or (eq *target-client-id-list* :all)
                        (find id *target-client-id-list*))
-               (receive-message-from-server client message)))
+               (dolist (message messages)
+                 (receive-message-from-server client message))))
            (wss-mock-client-table wss)))
 
 ;; --- original interfaces --- ;;

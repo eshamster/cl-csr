@@ -101,7 +101,7 @@
             tt
           (testing desc
             (let ((*target-client-id-list* target-ids))
-              (send-from-server wsm (make-dummy-message kind))
+              (send-from-server wsm (list (make-dummy-message kind)))
               (ok (expected-kind-seq-p (get-bufferred-messages wcm0)
                                        expect-buffer-0))
               (ok (expected-kind-seq-p (get-bufferred-messages wcm1)

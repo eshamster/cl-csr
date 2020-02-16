@@ -2,7 +2,6 @@
   (:use :cl)
   (:export :get-ws-server
            :set-ws-server
-           :with-ws-server
            :send-from-server
            :*target-client-id-list*
            :same-target-client-list-p
@@ -14,7 +13,9 @@
            :client-message
            :client-message-client-id
            :client-message-message
-           :make-client-message))
+           :make-client-message
+           ;; - for test - ;;
+           :with-ws-server))
 (in-package :cl-csr/ws-server)
 
 (defstruct client-message
@@ -50,8 +51,8 @@ Otherwise, it is sent to the listed clients.")
            (eq lst2 :all))
       (and (listp lst1)
            (listp lst2)
-           (equalp (sort lst1 #'<)
-               (sort lst2 #'<)))))
+           (equalp (sort (copy-list lst1) #'<)
+                   (sort (copy-list lst2) #'<)))))
 
 (defun copy-target-client-id-list (&optional (lst *target-client-id-list*))
   (if (eq lst :all)

@@ -22,7 +22,10 @@
            :texture-code-p
            :font-code-p
            :bool-to-number
-           :number-to-bool)
+           :number-to-bool
+           ;; - for test - ;;
+           :with-protocol-state
+           :make-protocol-state)
   (:import-from :cl-csr/ws-server
                 :get-ws-server
                 :send-from-server
@@ -119,28 +122,37 @@
 
 ;; --- sender --- ;;
 
-(defvar *pre-target-client-id-list* nil)
-(defvar *message-buffer* nil)
-(defparameter *max-message-buffer* 10) ; Not well-considered value
+(defstruct protocol-state
+  (pre-target-client-id-list :all)
+  (message-buffer nil)
+  (buffer-size 30))
+
+(defvar *protocol-state* (make-protocol-state))
+
+(defmacro with-protocol-state ((state) &body body)
+  `(let ((*protocol-state* ,state))
+     ,@body))
 
 (defun send-messages-in-buffer ()
-  (send-from-server (get-ws-server) *message-buffer*)
-  (setf *message-buffer* nil))
+  (symbol-macrolet ((buf (protocol-state-message-buffer *protocol-state*)))
+    (send-from-server (get-ws-server) (reverse buf))
+    (setf buf nil)))
 
 (defun send-message (kind-name frame index-in-frame data)
-  (unless (same-target-client-list-p *pre-target-client-id-list*
-                                     *target-client-id-list*)
-    (let ((*target-client-id-list* *pre-target-client-id-list*))
-      (send-messages-in-buffer)))
-  (setf *pre-target-client-id-list* (copy-target-client-id-list))
-  (push (plist-to-nested-hash-table `(:kind ,(name-to-code kind-name)
-                                            :frame ,frame
-                                            :no ,index-in-frame
-                                            :data ,data))
-        *message-buffer*)
-  (when (or (eq kind-name :frame-end)
-            (>= (length *message-buffer*) *max-message-buffer*))
-    (send-messages-in-buffer)))
+  (symbol-macrolet ((pre-target (protocol-state-pre-target-client-id-list *protocol-state*))
+                    (buf (protocol-state-message-buffer *protocol-state*)))
+    (unless (same-target-client-list-p pre-target *target-client-id-list*)
+      (let ((*target-client-id-list* pre-target))
+        (send-messages-in-buffer)))
+    (setf pre-target (copy-target-client-id-list))
+    (push (plist-to-nested-hash-table `(:kind ,(name-to-code kind-name)
+                                              :frame ,frame
+                                              :no ,index-in-frame
+                                              :data ,data))
+          buf)
+    (when (or (eq kind-name :frame-end)
+              (>= (length buf) (protocol-state-buffer-size *protocol-state*)))
+      (send-messages-in-buffer))))
 
 (eval-when (:execute :compile-toplevel :load-toplevel)
   (defvar *sender-table* (make-hash-table)

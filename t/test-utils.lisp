@@ -49,14 +49,18 @@
 ;; --- ;;
 
 (defun expected-kind-seq-p (messages expected)
-  (every #'expected-kind-p messages expected))
+  (and (= (length messages) (length expected))
+       (every #'expected-kind-p messages expected)))
 
 (deftest test-expected-kind-seq-p
   (let ((messages (list (make-dummy-message :frame-start)
                         (make-dummy-message :draw-rect))))
     (ok (expected-kind-seq-p messages '(:frame-start :draw-rect)))
     (ok (not (expected-kind-seq-p messages '(:draw-rect))))
-    (ok (not (expected-kind-seq-p messages '(:frame-start :draw-circle))))))
+    (ok (not (expected-kind-seq-p messages '(:frame-start :draw-circle)))))
+  (testing "empty messages"
+    (ok (expected-kind-seq-p nil nil))
+    (ok (not (expected-kind-seq-p nil '(:frame-start))))))
 
 ;; --- ;;
 

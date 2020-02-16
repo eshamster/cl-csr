@@ -46,6 +46,7 @@
                "cl-csr/t/utils/hash-table"
                "cl-csr/t/utils/input"
                "cl-csr/t/utils/list"
+               "cl-csr/t/client-list-manager"
                "cl-csr/t/frame-counter"
                "cl-csr/t/protocol"
                "cl-csr/t/test-utils")

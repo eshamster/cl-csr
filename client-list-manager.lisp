@@ -5,7 +5,9 @@
            :get-deleted-client-id-list
            :get-client-id-list
            :client-alive-p
-           :with-sending-to-new-clients)
+           :with-sending-to-new-clients
+           ;; - for test - ;;
+           :with-clean-client-list-manager)
   (:import-from :cl-csr/ws-server
                 :*target-client-id-list*
                 :get-ws-server
@@ -19,7 +21,8 @@
   (let ((ws-server (get-ws-server)))
     (setf *new-client-list* (pop-new-client-ids ws-server)
           *deleted-client-list* (pop-deleted-client-ids ws-server)))
-  (setf *client-list* (append *client-list* *new-client-list*))
+  (setf *client-list* (append (copy-list *client-list*)
+                              (copy-list *new-client-list*)))
   (dolist (deleted-id *deleted-client-list*)
     (setf *client-list* (delete deleted-id *client-list*))))
 
@@ -42,10 +45,16 @@
          (let ((*target-client-id-list* ,new-clients))
            ,@body)))))
 
-;; --- internal --- ;;
+;; - for test - ;;
 
+(defmacro with-clean-client-list-manager (&body body)
+  `(let ((*new-client-list* nil)
+         (*deleted-client-list* nil)
+         (*client-list* nil))
+     ,@body))
+
+;; --- internal --- ;;
 
 (defvar *new-client-list* nil)
 (defvar *deleted-client-list* nil)
-
 (defvar *client-list* nil)

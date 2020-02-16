@@ -8,7 +8,11 @@
            :make-dummy-client-message)
   (:import-from :cl-csr/protocol
                 :name-to-code
-                :code-to-name)
+                :code-to-name
+                :with-protocol-state
+                :make-protocol-state)
+  (:import-from :cl-csr/client-list-manager
+                :with-clean-client-list-manager)
   (:import-from :cl-csr/ws-server
                 :client-message
                 :make-client-message
@@ -34,7 +38,9 @@
 (defmacro with-mock-ws-server ((server-var) &body body)
   `(let ((,server-var (make-ws-server-mock)))
      (with-ws-server (,server-var)
-       ,@body)))
+       (with-clean-client-list-manager
+         (with-protocol-state ((make-protocol-state))
+           ,@body)))))
 
 ;; --- ;;
 

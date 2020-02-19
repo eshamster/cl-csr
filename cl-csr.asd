@@ -48,6 +48,7 @@
                "cl-csr/t/utils/list"
                "cl-csr/t/client-list-manager"
                "cl-csr/t/frame-counter"
+               "cl-csr/t/input"
                "cl-csr/t/protocol"
                "cl-csr/t/test-utils")
   :perform (test-op (o c) (symbol-call :rove '#:run c)))

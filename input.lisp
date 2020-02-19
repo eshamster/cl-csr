@@ -18,7 +18,9 @@
            :touch-summary-down-p
            :touch-summary-up-now-p
            :touch-summary-up-p
-           :get-touch-summary-pos)
+           :get-touch-summary-pos
+           ;; - for test - ;;
+           :with-clean-input-state)
   (:import-from :cl-csr/utils/input
                 :make-key-input-info
                 :update-key-input-info
@@ -96,6 +98,14 @@
   (update-mouse-info)
   ;; touch
   (update-touch-info))
+
+(defmacro with-clean-input-state (&body body)
+  ;; TODO: integrate these global variables to one variable
+  `(let ((*client-input-info-table* (make-hash-table))
+         (*mouse-info-table* (make-hash-table))
+         (*latest-touch-id* 0)
+         (*touch-info-table* (make-hash-table)))
+     ,@body))
 
 ;; - keyboard - ;;
 

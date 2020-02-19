@@ -6,6 +6,7 @@
            :*target-client-id-list*
            :same-target-client-list-p
            :copy-target-client-id-list
+           :calc-common-target
            :pop-new-client-ids
            :pop-deleted-client-ids
            :pop-client-messages
@@ -58,3 +59,10 @@ Otherwise, it is sent to the listed clients.")
   (if (eq lst :all)
       :all
       (copy-list lst)))
+
+(defun calc-common-target (id-list1 id-list2)
+  (cond ((eq id-list1 :all) id-list2)
+        ((eq id-list2 :all) id-list1)
+        (t (remove-if (lambda (id)
+                        (not (find id id-list1)))
+                      id-list2))))

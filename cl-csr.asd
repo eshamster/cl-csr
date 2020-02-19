@@ -50,5 +50,6 @@
                "cl-csr/t/frame-counter"
                "cl-csr/t/input"
                "cl-csr/t/protocol"
+               "cl-csr/t/ws-server"
                "cl-csr/t/test-utils")
   :perform (test-op (o c) (symbol-call :rove '#:run c)))

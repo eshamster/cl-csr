@@ -7,7 +7,9 @@
            :draw-arc
            :draw-image
            :draw-text
-           :skip-drawing-in-this-frame)
+           :skip-drawing-in-this-frame
+           ;; - for test - ;;
+           :with-clean-graphics-state)
   (:import-from :cl-csr/client-list-manager
                 :get-new-client-id-list)
   (:import-from :cl-csr/frame-counter
@@ -36,6 +38,14 @@
 
 (defvar *skip-drawing-p* nil)
 (defvar *new-client-list* nil)
+
+(defmacro with-clean-graphics-state (&body body)
+  ;; TODO: integrate these global variables to one variable
+  `(let ((*skip-drawing-p* nil)
+         (*new-client-list* nil)
+         (*draw-info-table* (make-hash-table))
+         (*prev-draw-info-table* (make-hash-table)))
+     ,@body))
 
 ;; --- interface --- ;;
 

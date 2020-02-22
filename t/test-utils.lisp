@@ -6,6 +6,8 @@
            :with-mock-ws-server
            :make-dummy-message
            :make-dummy-client-message)
+  (:import-from :cl-csr/graphics
+                :with-clean-graphics-state)
   (:import-from :cl-csr/input
                 :with-clean-input-state)
   (:import-from :cl-csr/protocol
@@ -42,8 +44,9 @@
      (with-ws-server (,server-var)
        (with-clean-client-list-manager
          (with-protocol-state ((make-protocol-state))
-           (with-clean-input-state
-             ,@body))))))
+           (with-clean-graphics-state
+             (with-clean-input-state
+               ,@body)))))))
 
 ;; --- ;;
 

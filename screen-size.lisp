@@ -2,7 +2,9 @@
   (:use :cl)
   (:export :update-screen-size
            :get-screen-size
-           :set-screen-size)
+           :set-screen-size
+           ;; - for test - ;;
+           :with-clean-screen-size)
   (:import-from :cl-csr/client-list-manager
                 :get-new-client-id-list)
   (:import-from :cl-csr/frame-counter
@@ -20,6 +22,11 @@
 
 (defvar *screen-width* 800)
 (defvar *screen-height* 600)
+
+(defmacro with-clean-screen-size ((width height) &body body)
+  `(let ((*screen-width* ,width)
+         (*screen-height* ,height))
+     ,@body))
 
 ;; --- interface --- ;;
 

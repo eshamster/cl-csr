@@ -2,32 +2,20 @@
   (:use :cl
         :rove
         :cl-csr/graphics)
-  (:import-from :cl-csr/client-list-manager
-                :update-client-list)
-  (:import-from :cl-csr/frame-counter
-                :incf-frame-count
-                :get-frame-count
-                :reset-frame-count
-                :incf-index-in-frame)
-  (:import-from :cl-csr/protocol
-                :send-frame-start
-                :send-frame-end)
   (:import-from :cl-csr/mock/ws-server-mock
                 :add-mock-client)
   (:import-from :cl-csr/mock/ws-client-mock
                 :get-latest-messages)
   (:import-from :cl-csr/t/test-utils
                 :with-mock-ws-server
+                :with-update-frame
                 :expected-kind-seq-p))
 (in-package :cl-csr/t/graphics)
 
 (defmacro with-one-cycle (&body body)
-  `(progn (update-client-list)
-          (send-frame-start (get-frame-count) (incf-index-in-frame))
-          ,@body
-          (update-graphics)
-          (send-frame-end (get-frame-count) (incf-index-in-frame))
-          (incf-frame-count)))
+  `(with-update-frame
+     ,@body
+     (update-graphics)))
 
 (deftest test-single-client
   (with-mock-ws-server (ws-server)
@@ -82,19 +70,18 @@
                                   (draw-circle :id 0 :x 1 :y 2 :depth 4 :color 5 :r 6))
                          :exp-kinds ((0 (:frame-start :frame-end))
                                      (1 (:frame-start :draw-circle :frame-end)))))))
-      (let ()
-        (dolist (tt test-table)
-          (destructuring-bind (&key desc new-client-ids proc exp-kinds)
-              tt
-            (testing desc
-              (dolist (id new-client-ids)
-                (setf (gethash id client-table)
-                      (add-mock-client ws-server id)))
-              (with-one-cycle
-                (when proc
-                  (funcall proc)))
-              (dolist (pair exp-kinds)
-                (destructuring-bind (id kind-seq) pair
-                  (let ((client (gethash id client-table)))
-                    (assert client)
-                    (ok (expected-kind-seq-p (get-latest-messages client) kind-seq))))))))))))
+      (dolist (tt test-table)
+        (destructuring-bind (&key desc new-client-ids proc exp-kinds)
+            tt
+          (testing desc
+            (dolist (id new-client-ids)
+              (setf (gethash id client-table)
+                    (add-mock-client ws-server id)))
+            (with-one-cycle
+              (when proc
+                (funcall proc)))
+            (dolist (pair exp-kinds)
+              (destructuring-bind (id kind-seq) pair
+                (let ((client (gethash id client-table)))
+                  (assert client)
+                  (ok (expected-kind-seq-p (get-latest-messages client) kind-seq)))))))))))

@@ -5,7 +5,14 @@
            :expected-client-messages-p
            :with-mock-ws-server
            :make-dummy-message
-           :make-dummy-client-message)
+           :make-dummy-client-message
+           :with-update-frame
+           :get-default-test-screen-size)
+  (:import-from :cl-csr/frame-counter
+                :incf-frame-count
+                :get-frame-count
+                :reset-frame-count
+                :incf-index-in-frame)
   (:import-from :cl-csr/graphics
                 :with-clean-graphics-state)
   (:import-from :cl-csr/input
@@ -14,9 +21,14 @@
                 :name-to-code
                 :code-to-name
                 :with-protocol-state
-                :make-protocol-state)
+                :make-protocol-state
+                :send-frame-start
+                :send-frame-end)
   (:import-from :cl-csr/client-list-manager
+                :update-client-list
                 :with-clean-client-list-manager)
+  (:import-from :cl-csr/screen-size
+                :with-clean-screen-size)
   (:import-from :cl-csr/ws-server
                 :client-message
                 :make-client-message
@@ -39,6 +51,13 @@
 
 ;; --- ;;
 
+(defvar *default-test-screen-width* 800)
+(defvar *default-test-screen-height* 600)
+
+(defun get-default-test-screen-size ()
+  (values *default-test-screen-width*
+          *default-test-screen-height*))
+
 (defmacro with-mock-ws-server ((server-var) &body body)
   `(let ((,server-var (make-ws-server-mock)))
      (with-ws-server (,server-var)
@@ -46,7 +65,16 @@
          (with-protocol-state ((make-protocol-state))
            (with-clean-graphics-state
              (with-clean-input-state
-               ,@body)))))))
+               (with-clean-screen-size (*default-test-screen-width*
+                                        *default-test-screen-height*)
+                 ,@body))))))))
+
+(defmacro with-update-frame (&body body)
+  `(progn (update-client-list)
+          (send-frame-start (get-frame-count) (incf-index-in-frame))
+          ,@body
+          (send-frame-end (get-frame-count) (incf-index-in-frame))
+          (incf-frame-count)))
 
 ;; --- ;;
 

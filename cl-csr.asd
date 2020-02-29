@@ -51,6 +51,7 @@
                "cl-csr/t/graphics"
                "cl-csr/t/input"
                "cl-csr/t/protocol"
+               "cl-csr/t/screen-size"
                "cl-csr/t/ws-server"
                "cl-csr/t/test-utils")
   :perform (test-op (o c) (symbol-call :rove '#:run c)))

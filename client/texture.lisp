@@ -10,7 +10,8 @@
                 :code-to-name)
   (:import-from :cl-csr/client/graphics
                 :make-solid-rect
-                :make-model)
+                :make-model
+                :model-graphics)
   (:import-from :cl-csr/client/utils
                 :with-command-data)
   (:import-from :alexandria
@@ -87,10 +88,10 @@
         (let ((dummy-rect (make-solid-rect :width width :height height :color #x888888)))
           (register-func-with-pred
            (lambda ()
-             (container.remove-child dummy-rect)
+             (container.remove-child (model-graphics dummy-rect))
              (container.add-child (make-sprite)))
            (lambda () (image-loaded-p image-id)))
-          (container.add-child dummy-rect)
+          (container.add-child (model-graphics dummy-rect))
           (return-from make-image-model (make-model :graphics container))))
       ;; the case where the texture has been loaded.
       (container.add-child (make-sprite))

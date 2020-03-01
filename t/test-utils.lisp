@@ -8,6 +8,8 @@
            :make-dummy-client-message
            :with-update-frame
            :get-default-test-screen-size)
+  (:import-from :cl-csr/camera
+                :with-clean-camera-info)
   (:import-from :cl-csr/frame-counter
                 :incf-frame-count
                 :get-frame-count
@@ -67,7 +69,8 @@
              (with-clean-input-state
                (with-clean-screen-size (*default-test-screen-width*
                                         *default-test-screen-height*)
-                 ,@body))))))))
+                 (with-clean-camera-info
+                   ,@body)))))))))
 
 (defmacro with-update-frame (&body body)
   `(progn (update-client-list)

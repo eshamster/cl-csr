@@ -4,7 +4,9 @@
            :get-camera-center-pos
            :get-camera-scale
            :set-camera-center-pos
-           :set-camera-scale)
+           :set-camera-scale
+           ;; - for test - ;;
+           :with-clean-camera-info)
   (:import-from :cl-csr/client-list-manager
                 :get-new-client-id-list
                 :get-deleted-client-id-list)
@@ -24,6 +26,10 @@
 (defstruct camera-info center-x center-y scale)
 
 (defvar *camera-info-table* (make-hash-table))
+
+(defmacro with-clean-camera-info (&body body)
+  `(let ((*camera-info-table* (make-hash-table)))
+     ,@body))
 
 ;; --- interface --- ;;
 

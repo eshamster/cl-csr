@@ -11,7 +11,7 @@
                 :pop-client-messages
                 :make-client-message)
   (:import-from :cl-csr/utils/hash-table
-                :downcase-hash-keys)
+                :downcase-hash-keys-and-values)
   (:import-from :bordeaux-threads
                 :make-lock
                 :with-lock-held)
@@ -108,17 +108,18 @@
           (start-connection server))))))
 
 (defmethod send-from-server ((wss ws-server) message)
-  (maphash (lambda (id server)
-             (case (ready-state server)
-               (:open (when (or (eq *target-client-id-list* :all)
-                                (find id *target-client-id-list*))
-                        ;; Note: Parenscript converts ":a" to "a" not to "A".
-                        ;; To read message by ":a" in Parenscript downcasing is requried.
-                        (send server (to-json (mapcar #'downcase-hash-keys message)))))
-               (:closed (format t "~&Connection closed: ~D" id)
-                        (remhash id (wss-client-id-to-server wss))
-                        (with-lock-held ((wss-lock-for-deleted wss))
-                          (push id (wss-deleted-client-id-list wss))))
-               ;; otherwise do nothing
-               ))
-           (wss-client-id-to-server wss)))
+  (let ((processed-message (to-json (mapcar #'downcase-hash-keys-and-values message))))
+    (maphash (lambda (id server)
+               (case (ready-state server)
+                 (:open (when (or (eq *target-client-id-list* :all)
+                                  (find id *target-client-id-list*))
+                          ;; Note: Parenscript converts ":a" to "a" not to "A".
+                          ;; To read message by ":a" in Parenscript downcasing is requried.
+                          (send server processed-message)))
+                 (:closed (format t "~&Connection closed: ~D" id)
+                          (remhash id (wss-client-id-to-server wss))
+                          (with-lock-held ((wss-lock-for-deleted wss))
+                            (push id (wss-deleted-client-id-list wss))))
+                 ;; otherwise do nothing
+                 ))
+             (wss-client-id-to-server wss))))

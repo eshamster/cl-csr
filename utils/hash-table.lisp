@@ -1,21 +1,25 @@
 (defpackage cl-csr/utils/hash-table
   (:use :cl)
-  (:export :downcase-hash-keys))
+  (:export :downcase-hash-keys-and-values))
 (in-package :cl-csr/utils/hash-table)
 
 ;; --- interface --- ;;
 
-(defun downcase-hash-keys (nested-hash)
+(defun downcase-hash-keys-and-values (nested-hash)
   (labels ((down (sym)
              (intern (string-downcase (symbol-name sym))
                      (symbol-package sym)))
+           (down-if-keyword (value)
+             (if (keywordp value)
+                 (down value)
+                 value))
            (rec (hash)
              (let ((res (make-hash-table)))
                (maphash (lambda (k v)
                           (setf (gethash (down k) res)
                                 (if (hash-table-p v)
                                     (rec v)
-                                    v)))
+                                    (down-if-keyword v))))
                         hash)
                res)))
     (rec nested-hash)))

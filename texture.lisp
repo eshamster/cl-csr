@@ -18,8 +18,6 @@
   (:import-from :cl-csr/protocol
                 :send-load-texture
                 :send-load-image)
-  (:import-from :cl-csr/ws-server
-                :*target-client-id-list*)
   (:import-from :alexandria
                 :maphash-values)
   (:import-from :opticl
@@ -43,7 +41,6 @@
 (defstruct texture-info
   id
   path
-  alpha-path
   width
   height)
 
@@ -69,13 +66,13 @@
                       (process-load-image img-info))
                     *image-table*)))
 
-(defun load-texture (&key name path alpha-path)
+(defun load-texture (&key name path)
   "Load a texture.
 A name is represented as a keyword.
-A path and alpha-path are relative ones from image root."
+A path is relative ones from image root."
   (check-type name keyword)
   (setf (gethash name *texture-table*)
-        (init-texture-info (make-texture-id name) path alpha-path)))
+        (init-texture-info (make-texture-id name) path)))
 
 (defun load-image (&key texture-name image-name (uv (make-image-uv)))
   "Load a image.
@@ -137,13 +134,12 @@ A texture identifed by texture-name can be used for multiple images that have di
    *texture-table*)
   (error "The id ~D is not inclueded in the texture info table." id))
 
-(defun init-texture-info (id relative-path relative-alpha-path)
+(defun init-texture-info (id relative-path)
   (assert *image-root-path*)
   (multiple-value-bind (width height)
       (read-image-size (merge-pathnames relative-path *image-root-path*))
     (let ((result (make-texture-info :id id
                                      :path relative-path
-                                     :alpha-path relative-alpha-path
                                      :width width :height height)))
       (process-load-texture result)
       result)))
@@ -169,21 +165,11 @@ A texture identifed by texture-name can be used for multiple images that have di
 ;; - sender - ;;
 
 (defun process-load-texture (tex-info)
-  (let ((alpha-path (texture-info-alpha-path tex-info)))
-    (send-load-texture (get-frame-count) (incf-index-in-frame)
-                       :path (namestring
-                              (merge-pathnames (texture-info-path tex-info)
-                                               (get-image-relative-path)))
-                       ;; Note: In jonathan:to-json, nil is converted to "[]".
-                       ;; But it is not interpreted as false in JavaScript.
-                       ;; So use 0 instead of it.
-                       ;; (But it is a dirty solution...)
-                       :alpha-path (if alpha-path
-                                       (namestring
-                                        (merge-pathnames alpha-path
-                                                         (get-image-relative-path)))
-                                       0)
-                       :texture-id (texture-info-id tex-info))))
+  (send-load-texture (get-frame-count) (incf-index-in-frame)
+                     :path (namestring
+                            (merge-pathnames (texture-info-path tex-info)
+                                             (get-image-relative-path)))
+                     :texture-id (texture-info-id tex-info)))
 
 (defun process-load-image (img-info)
   (let ((uv (image-info-uv img-info))

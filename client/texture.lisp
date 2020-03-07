@@ -26,8 +26,7 @@
 
 (defstruct.ps+ texture-info
   id
-  bitmap-image
-  alpha-bitmap-image)
+  bitmap-image)
 
 (defstruct.ps+ image-info
   id
@@ -39,7 +38,6 @@
   "Key: texture id, Value: texture-info")
 (defvar.ps+ *image-info-table* (make-hash-table)
   "Key: image id, Value: image-info")
-
 
 ;; --- interface --- ;;
 

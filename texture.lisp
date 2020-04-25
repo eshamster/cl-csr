@@ -9,7 +9,9 @@
            :get-texture-id
            :set-image-path
            :get-image-root-path
-           :get-image-relative-path)
+           :get-image-relative-path
+           ;; - for test - ;;
+           :with-clean-texture-state)
   (:import-from :cl-csr/client-list-manager
                 :with-sending-to-new-clients)
   (:import-from :cl-csr/frame-counter
@@ -55,6 +57,15 @@
   texture-id
   (uv (make-image-uv)))
 
+(defmacro with-clean-texture-state (&body body)
+  `(let ((*texture-id* 0)
+         (*image-id* 0)
+         (*texture-table* (make-hash-table))
+         (*image-root-path* nil)
+         (*image-relative-path* nil)
+         (*image-table* (make-hash-table)))
+     ,@body))
+
 ;; --- interface --- ;;
 
 (defun update-texture ()
@@ -75,7 +86,7 @@ A path is relative ones from image root."
         (init-texture-info (make-texture-id name) path)))
 
 (defun load-image (&key texture-name image-name (uv (make-image-uv)))
-  "Load a image.
+  "Load an image.
 A texture-name and image-name are represented as keywords.
 The texture-name should has been loaded by \"load-texture\".
 A texture identifed by texture-name can be used for multiple images that have different UVs."
@@ -99,10 +110,20 @@ A texture identifed by texture-name can be used for multiple images that have di
               (* tex-height (image-uv-height uv))))))
 
 (defun get-image-id (name)
-  (image-info-id (gethash name *image-table*)))
+  "Return ID of image if specified image has been loaded.
+Otherwise return nil."
+  (multiple-value-bind (info found)
+      (gethash name *image-table*)
+    (when found
+      (image-info-id info))))
 
 (defun get-texture-id (name)
-  (texture-info-id (gethash name *texture-table*)))
+  "Return ID of texture if specified texture has been loaded.
+Otherwise return nil."
+  (multiple-value-bind (info found)
+      (gethash name *texture-table*)
+    (when found
+      (texture-info-id info))))
 
 (defun set-image-path (resource-root-path relative-path)
   (setf *image-root-path*
@@ -153,7 +174,7 @@ A texture identifed by texture-name can be used for multiple images that have di
 ;; Note: Only for PNG
 (defun read-image-size (path)
   (let ((img (read-png-file path)))
-    (with-image-bounds (width height) img
+    (with-image-bounds (height width) img
       (values width height))))
 
 (defun make-texture-id (name)

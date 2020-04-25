@@ -31,6 +31,8 @@
                 :with-clean-client-list-manager)
   (:import-from :cl-csr/screen-size
                 :with-clean-screen-size)
+  (:import-from :cl-csr/texture
+                :with-clean-texture-state)
   (:import-from :cl-csr/ws-server
                 :client-message
                 :make-client-message
@@ -70,7 +72,8 @@
                (with-clean-screen-size (*default-test-screen-width*
                                         *default-test-screen-height*)
                  (with-clean-camera-info
-                   ,@body)))))))))
+                   (with-clean-texture-state
+                     ,@body))))))))))
 
 (defmacro with-update-frame (&body body)
   `(progn (update-client-list)
@@ -91,9 +94,14 @@
 
 ;; --- ;;
 
+(defun messages-to-kind-list (messages)
+  (mapcar (lambda (message)
+            (code-to-name (gethash :kind message)))
+          messages))
+
 (defun expected-kind-seq-p (messages expected)
   (and (= (length messages) (length expected))
-       (every #'expected-kind-p messages expected)))
+       (equalp (messages-to-kind-list messages) expected)))
 
 (deftest test-expected-kind-seq-p
   (let ((messages (list (make-dummy-message :frame-start)

@@ -11,8 +11,7 @@
   (:import-from :cl-csr/t/test-utils
                 :with-mock-ws-server
                 :with-update-frame
-                :expected-kind-seq-p
-                :get-default-test-screen-size))
+                :expected-kind-seq-p))
 (in-package :cl-csr/t/texture)
 
 (defmacro with-one-cycle (&body body)

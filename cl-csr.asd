@@ -48,6 +48,7 @@
                "cl-csr/t/utils/list"
                "cl-csr/t/camera"
                "cl-csr/t/client-list-manager"
+               "cl-csr/t/font"
                "cl-csr/t/frame-counter"
                "cl-csr/t/graphics"
                "cl-csr/t/input"

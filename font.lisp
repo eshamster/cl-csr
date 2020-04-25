@@ -2,7 +2,9 @@
   (:use :cl)
   (:export :load-font
            :update-font
-           :get-font-id)
+           :get-font-id
+           ;; - for test - ;;
+           :with-clean-font-state)
   (:import-from :cl-csr/client-list-manager
                 :with-sending-to-new-clients)
   (:import-from :cl-csr/frame-counter
@@ -27,6 +29,11 @@
 
 (defstruct font-info id font-name)
 
+(defmacro with-clean-font-state (&body body) ; for test
+  `(let ((*font-id* 0)
+         (*font-table* (make-hash-table)))
+     ,@body))
+
 ;; --- interface --- ;;
 
 (defun update-font ()
@@ -39,14 +46,18 @@
   "Load a font.
 The name is represented as a keyword."
   (check-type name keyword)
-  (setf (gethash name *font-table*)
-        (make-font-info :id (make-font-id name)
-                        :font-name font-name)))
+  (let ((info (make-font-info :id (make-font-id name)
+                              :font-name font-name)))
+    (setf (gethash name *font-table*) info)
+    (process-load-font info)))
 
 ;; TODO: Functions to remove fonts
 
 (defun get-font-id (name)
-  (font-info-id (gethash name *font-table*)))
+  (multiple-value-bind (info foundp)
+      (gethash name *font-table*)
+    (when foundp
+      (font-info-id info))))
 
 ;; --- internal --- ;;
 

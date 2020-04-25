@@ -10,6 +10,8 @@
            :get-default-test-screen-size)
   (:import-from :cl-csr/camera
                 :with-clean-camera-info)
+  (:import-from :cl-csr/font
+                :with-clean-font-state)
   (:import-from :cl-csr/frame-counter
                 :incf-frame-count
                 :get-frame-count
@@ -73,7 +75,8 @@
                                         *default-test-screen-height*)
                  (with-clean-camera-info
                    (with-clean-texture-state
-                     ,@body))))))))))
+                     (with-clean-font-state
+                       ,@body)))))))))))
 
 (defmacro with-update-frame (&body body)
   `(progn (update-client-list)

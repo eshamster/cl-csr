@@ -34,13 +34,21 @@
                                  :exp-kinds ((0 (:frame-start :frame-end)))
                                  :exp-width ,def-width
                                  :exp-height ,def-height)
-                          (:desc "Send a screen-size message"
+                          (:desc "Send a new screen-size message"
                                  :proc ,(lambda ()
                                           (set-screen-size :width 1000 :height 500))
-                                 ;; ((client-id (kind...))...)
                                  :exp-kinds ((0 (:frame-start :set-screen-size :frame-end)))
                                  :exp-width 1000
-                                 :exp-height 500))))
+                                 :exp-height 500)
+                          (:desc "Send a new screen-size message"
+                                 :new-client-ids (1)
+                                 :proc ,(lambda ()
+                                          (set-screen-size :width 2000 :height 1000))
+                                 :exp-kinds ((0 (:frame-start :set-screen-size :frame-end))
+                                             ;; TODO: Prevent sending an old message when other messages are sent.
+                                             (1 (:frame-start :set-screen-size :set-screen-size :frame-end)))
+                                 :exp-width 2000
+                                 :exp-height 1000))))
         (dolist (tt test-table)
           (destructuring-bind (&key desc new-client-ids proc exp-kinds exp-width exp-height)
               tt

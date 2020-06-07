@@ -30,6 +30,7 @@
 
 ;; --- interface --- ;;
 
+;; TODO: Prevent sending an old message when other messages are sent.
 (defun update-screen-size ()
   (when (get-new-client-id-list)
     (with-sending-to-new-clients ()

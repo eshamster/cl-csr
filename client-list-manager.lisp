@@ -5,33 +5,24 @@
            :get-deleted-client-id-list
            :get-client-id-list
            :client-alive-p
-           :with-sending-to-new-clients)
+           :with-sending-to-new-clients
+           ;; - for test - ;;
+           :with-clean-client-list-manager)
   (:import-from :cl-csr/ws-server
                 :*target-client-id-list*
-                :register-callback-on-connecting
-                :register-callback-on-disconnecting))
+                :get-ws-server
+                :pop-new-client-ids
+                :pop-deleted-client-ids))
 (in-package :cl-csr/client-list-manager)
-
-;; TODO: should lock buffers
-
-;; --- registration --- ;;
-
-(register-callback-on-connecting
- 'detect-new-client (lambda (client-id)
-                      (pushnew client-id *new-client-list-buffer*)))
-
-(register-callback-on-disconnecting
- 'detect-deleted-client (lambda (client-id)
-                          (pushnew client-id *deleted-client-list-buffer*)))
 
 ;; --- interface --- ;;
 
 (defun update-client-list ()
-  (setf *new-client-list* *new-client-list-buffer*
-        *new-client-list-buffer* nil
-        *deleted-client-list* *deleted-client-list-buffer*
-        *deleted-client-list-buffer* nil)
-  (setf *client-list* (append *client-list* *new-client-list*))
+  (let ((ws-server (get-ws-server)))
+    (setf *new-client-list* (pop-new-client-ids ws-server)
+          *deleted-client-list* (pop-deleted-client-ids ws-server)))
+  (setf *client-list* (append (copy-list *client-list*)
+                              (copy-list *new-client-list*)))
   (dolist (deleted-id *deleted-client-list*)
     (setf *client-list* (delete deleted-id *client-list*))))
 
@@ -54,17 +45,16 @@
          (let ((*target-client-id-list* ,new-clients))
            ,@body)))))
 
+;; - for test - ;;
+
+(defmacro with-clean-client-list-manager (&body body)
+  `(let ((*new-client-list* nil)
+         (*deleted-client-list* nil)
+         (*client-list* nil))
+     ,@body))
+
 ;; --- internal --- ;;
 
-
 (defvar *new-client-list* nil)
-(defvar *new-client-list-buffer* nil)
-
 (defvar *deleted-client-list* nil)
-(defvar *deleted-client-list-buffer* nil)
-
 (defvar *client-list* nil)
-
-(register-callback-on-connecting
- 'add-new-client-list-to-buffer
- (lambda (client-id) (push client-id *new-client-list-buffer*)))

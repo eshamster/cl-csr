@@ -20,16 +20,8 @@
                 :path "sample.png")
   (load-image :image-name :sample
               :texture-name :sample)
-
-  (load-texture :name :sample-with-alpha
-                :path "sample.png"
-                :alpha-path "sample_alpha.png")
-  (load-image :image-name :sample-with-alpha
-              :texture-name :sample-with-alpha)
-
   (load-texture :name :multiple-image
-                :path "multiple_image.png"
-                :alpha-path "multiple_image_alpha.png")
+                :path "multiple_image.png")
   (load-image :image-name :a
               :texture-name :multiple-image
               :uv (make-image-uv :width 0.5))
@@ -53,12 +45,6 @@
     (draw-image :id (incf id)
                 :image-name :sample
                 :x 400 :y 300
-                :width 50 :height 50
-                :rotate (* -1/10 *temp-counter*)
-                :depth 0 :color #xffffff)
-    (draw-image :id (incf id)
-                :image-name :sample-with-alpha
-                :x 400 :y 200
                 :width 50 :height 50
                 :rotate (* -1/10 *temp-counter*)
                 :depth 0 :color #xffffff)

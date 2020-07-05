@@ -1,8 +1,8 @@
 (defpackage cl-csr/middleware
   (:use :cl)
   (:export :make-client-side-rendering-middleware)
-  (:import-from :cl-csr/ws-server
-                :*ws-app*)
+  (:import-from :cl-csr/ws-server-impl
+                :make-ws-app)
   (:import-from :cl-csr/client/core
                 :output-client-js)
   (:import-from :cl-csr/texture
@@ -16,17 +16,18 @@
                                                 (image-relarive-path "img/"))
   (ensure-js-files  (merge-pathnames "js/" resource-root))
   (set-image-path resource-root image-relarive-path)
-  (lambda (app)
-    (lambda (env)
-      (output-client-js (merge-pathnames "js/client.js" resource-root))
-      (let ((uri (getf env :request-uri)))
-        (if (string= uri "/ws")
-            (funcall *ws-app* env)
-            (funcall (make-static-middleware
-                      app
-                      :resource-root resource-root
-                      :image-relarive-path image-relarive-path)
-                     env))))))
+  (let ((ws-app (make-ws-app)))
+    (lambda (app)
+      (lambda (env)
+        (output-client-js (merge-pathnames "js/client.js" resource-root))
+        (let ((uri (getf env :request-uri)))
+          (if (string= uri "/ws")
+              (funcall ws-app env)
+              (funcall (make-static-middleware
+                        app
+                        :resource-root resource-root
+                        :image-relarive-path image-relarive-path)
+                       env)))))))
 
 (defun make-static-middleware (app &key
                                      resource-root

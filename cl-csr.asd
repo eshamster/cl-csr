@@ -40,7 +40,21 @@
   :class :package-inferred-system
   :depends-on (:cl-csr
                :rove
-               "ps-experiment/t/test-utils"
+               "cl-csr/t/mock/ws-client-mock"
+               "cl-csr/t/mock/ws-server-mock"
                "cl-csr/t/utils/buffered-queue"
-               "cl-csr/t/utils/input")
+               "cl-csr/t/utils/hash-table"
+               "cl-csr/t/utils/input"
+               "cl-csr/t/utils/list"
+               "cl-csr/t/camera"
+               "cl-csr/t/client-list-manager"
+               "cl-csr/t/font"
+               "cl-csr/t/frame-counter"
+               "cl-csr/t/graphics"
+               "cl-csr/t/input"
+               "cl-csr/t/protocol"
+               "cl-csr/t/screen-size"
+               "cl-csr/t/texture"
+               "cl-csr/t/ws-server"
+               "cl-csr/t/test-utils")
   :perform (test-op (o c) (symbol-call :rove '#:run c)))

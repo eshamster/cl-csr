@@ -7,7 +7,9 @@
            :draw-arc
            :draw-image
            :draw-text
-           :skip-drawing-in-this-frame)
+           :skip-drawing-in-this-frame
+           ;; - for test - ;;
+           :with-clean-graphics-state)
   (:import-from :cl-csr/client-list-manager
                 :get-new-client-id-list)
   (:import-from :cl-csr/frame-counter
@@ -26,7 +28,8 @@
   (:import-from :cl-csr/texture
                 :get-image-id)
   (:import-from :cl-csr/ws-server
-                :*target-client-id-list*)
+                :*target-client-id-list*
+                :calc-common-target)
   (:import-from :alexandria
                 :make-keyword))
 (in-package :cl-csr/graphics)
@@ -35,6 +38,14 @@
 
 (defvar *skip-drawing-p* nil)
 (defvar *new-client-list* nil)
+
+(defmacro with-clean-graphics-state (&body body)
+  ;; TODO: integrate these global variables to one variable
+  `(let ((*skip-drawing-p* nil)
+         (*new-client-list* nil)
+         (*draw-info-table* (make-hash-table))
+         (*prev-draw-info-table* (make-hash-table)))
+     ,@body))
 
 ;; --- interface --- ;;
 
@@ -94,14 +105,6 @@
        ;;        (but adding new client can be detected)
        (same-param-table-p (draw-info-param-table info1)
                            (draw-info-param-table info2))))
-
-(defun calc-common-target (default-id-list new-client-id-list)
-  (if (listp default-id-list)
-      (remove-if (lambda (id)
-                   (not (find id default-id-list)))
-                 new-client-id-list)
-      new-client-id-list ; The default list is ":all"
-      ))
 
 (defun calc-target-client-id-list (object-id)
   (let ((info (gethash object-id *draw-info-table*))

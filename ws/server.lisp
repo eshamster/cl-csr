@@ -1,7 +1,7 @@
-(defpackage cl-csr/ws-server-impl
+(defpackage cl-csr/ws/server
   (:use :cl)
   (:export :make-ws-app)
-  (:import-from :cl-csr/ws-server
+  (:import-from :cl-csr/ws/ws
                 :get-ws-server
                 :set-ws-server
                 :send-from-server
@@ -24,7 +24,7 @@
                 :send
                 :start-connection
                 :ready-state))
-(in-package :cl-csr/ws-server-impl)
+(in-package :cl-csr/ws/server)
 
 ;; TODO: Make client id more defficult to be guessed
 (defvar *latest-client-id* 0)

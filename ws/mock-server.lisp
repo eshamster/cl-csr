@@ -1,21 +1,21 @@
-(defpackage cl-csr/mock/ws-server-mock
+(defpackage cl-csr/ws/mock-server
   (:use :cl)
   (:export :make-ws-server-mock
            :add-mock-client
            :delete-mock-client
            :receive-message-from-client
            :get-mock-client-ids)
-  (:import-from :cl-csr/ws-server
+  (:import-from :cl-csr/ws/ws
                 :send-from-server
                 :*target-client-id-list*
                 :pop-new-client-ids
                 :pop-deleted-client-ids
                 :pop-client-messages
                 :make-client-message)
-  (:import-from :cl-csr/mock/ws-client-mock
+  (:import-from :cl-csr/ws/mock-client
                 :ws-client-mock
                 :receive-message-from-server))
-(in-package :cl-csr/mock/ws-server-mock)
+(in-package :cl-csr/ws/mock-server)
 
 ;; --- data structure --- ;;
 

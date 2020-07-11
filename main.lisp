@@ -10,7 +10,7 @@
         :cl-csr/screen-size
         :cl-csr/texture
         :cl-csr/utils/dependency
-        :cl-csr/ws-server
+        :cl-csr/ws/ws
         :cl-csr/client-list-manager)
   (:export ;; camera
            :get-camera-center-pos

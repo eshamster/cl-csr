@@ -35,7 +35,7 @@
   (:import-from :cl-csr/protocol
                 :name-to-code
                 :code-to-name)
-  (:import-from :cl-csr/ws-server
+  (:import-from :cl-csr/ws/ws
                 :get-ws-server
                 :pop-client-messages
                 :client-message-client-id

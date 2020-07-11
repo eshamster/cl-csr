@@ -2,14 +2,15 @@
   (:use :cl
         :rove
         :cl-csr/client-list-manager)
-  (:import-from :cl-csr/mock/ws-client-mock
+  (:import-from :cl-csr/ws/mock-client
                 :get-bufferred-messages)
-  (:import-from :cl-csr/mock/ws-server-mock
+  (:import-from :cl-csr/ws/mock-server
                 :add-mock-client
                 :delete-mock-client)
-  (:import-from :cl-csr/ws-server
-                :same-target-client-list-p
+  (:import-from :cl-csr/ws/ws
                 :*target-client-id-list*)
+  (:import-from :cl-csr/ws/utils
+                :same-target-client-list-p)
   (:import-from :cl-csr/t/test-utils
                 :with-mock-ws-server
                 :expected-kind-seq-p))

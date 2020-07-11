@@ -17,7 +17,7 @@
                 :send-set-camera)
   (:import-from :cl-csr/screen-size
                 :get-screen-size)
-  (:import-from :cl-csr/ws-server
+  (:import-from :cl-csr/ws/ws
                 :*target-client-id-list*))
 (in-package :cl-csr/camera)
 

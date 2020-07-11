@@ -8,7 +8,7 @@
            :with-sending-to-new-clients
            ;; - for test - ;;
            :with-clean-client-list-manager)
-  (:import-from :cl-csr/ws-server
+  (:import-from :cl-csr/ws/ws
                 :*target-client-id-list*
                 :get-ws-server
                 :pop-new-client-ids

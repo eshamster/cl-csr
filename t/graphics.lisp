@@ -2,9 +2,9 @@
   (:use :cl
         :rove
         :cl-csr/graphics)
-  (:import-from :cl-csr/mock/ws-server-mock
+  (:import-from :cl-csr/ws/mock-server
                 :add-mock-client)
-  (:import-from :cl-csr/mock/ws-client-mock
+  (:import-from :cl-csr/ws/mock-client
                 :get-latest-messages)
   (:import-from :cl-csr/t/test-utils
                 :with-mock-ws-server

@@ -35,13 +35,13 @@
                 :with-clean-screen-size)
   (:import-from :cl-csr/texture
                 :with-clean-texture-state)
-  (:import-from :cl-csr/ws-server
+  (:import-from :cl-csr/ws/ws
                 :client-message
                 :make-client-message
                 :client-message-client-id
                 :client-message-message
                 :with-ws-server)
-  (:import-from :cl-csr/mock/ws-server-mock
+  (:import-from :cl-csr/ws/mock-server
                 :make-ws-server-mock))
 (in-package :cl-csr/t/test-utils)
 

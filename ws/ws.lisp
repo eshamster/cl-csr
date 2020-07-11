@@ -1,12 +1,9 @@
-(defpackage cl-csr/ws-server
+(defpackage cl-csr/ws/ws
   (:use :cl)
   (:export :get-ws-server
            :set-ws-server
            :send-from-server
            :*target-client-id-list*
-           :same-target-client-list-p
-           :copy-target-client-id-list
-           :calc-common-target
            :pop-new-client-ids
            :pop-deleted-client-ids
            :pop-client-messages
@@ -17,7 +14,7 @@
            :make-client-message
            ;; - for test - ;;
            :with-ws-server))
-(in-package :cl-csr/ws-server)
+(in-package :cl-csr/ws/ws)
 
 (defstruct client-message
   client-id
@@ -44,25 +41,3 @@
 (defvar *target-client-id-list* :all
   "If ':all', a message is sent to all clients.
 Otherwise, it is sent to the listed clients.")
-
-;; --- utils --- ;;
-
-(defun same-target-client-list-p (lst1 lst2)
-  (or (and (eq lst1 :all)
-           (eq lst2 :all))
-      (and (listp lst1)
-           (listp lst2)
-           (equalp (sort (copy-list lst1) #'<)
-                   (sort (copy-list lst2) #'<)))))
-
-(defun copy-target-client-id-list (&optional (lst *target-client-id-list*))
-  (if (eq lst :all)
-      :all
-      (copy-list lst)))
-
-(defun calc-common-target (id-list1 id-list2)
-  (cond ((eq id-list1 :all) id-list2)
-        ((eq id-list2 :all) id-list1)
-        (t (remove-if (lambda (id)
-                        (not (find id id-list1)))
-                      id-list2))))

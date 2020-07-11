@@ -1,4 +1,4 @@
-(defpackage cl-csr/mock/ws-client-mock
+(defpackage cl-csr/ws/mock-client
   (:use :cl)
   (:export :ws-client-mock
            :receive-message-from-server
@@ -6,7 +6,7 @@
            :get-bufferred-messages)
   (:import-from :cl-csr/protocol
                 :code-to-name))
-(in-package :cl-csr/mock/ws-client-mock)
+(in-package :cl-csr/ws/mock-client)
 
 (defclass ws-client-mock ()
   ((messages-list :initform nil

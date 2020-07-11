@@ -6,7 +6,7 @@
                 :name-to-code)
   (:import-from :cl-csr/client-list-manager
                 :update-client-list)
-  (:import-from :cl-csr/mock/ws-server-mock
+  (:import-from :cl-csr/ws/mock-server
                 :add-mock-client
                 :delete-mock-client
                 :receive-message-from-client)

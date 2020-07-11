@@ -1,8 +1,8 @@
-(defpackage cl-csr/t/ws-server
+(defpackage cl-csr/t/ws/utils
   (:use :cl
         :rove
-        :cl-csr/ws-server))
-(in-package :cl-csr/t/ws-server)
+        :cl-csr/ws/utils))
+(in-package :cl-csr/t/ws/utils)
 
 (deftest test-same-target-client-list-p
   (ok (same-target-client-list-p '(1 2) '(1 2)))

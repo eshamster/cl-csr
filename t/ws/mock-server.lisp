@@ -1,22 +1,22 @@
-(defpackage cl-csr/t/mock/ws-server-mock
+(defpackage cl-csr/t/ws/mock-server
   (:use :cl
         :rove
-        :cl-csr/mock/ws-server-mock)
-  (:import-from :cl-csr/ws-server
+        :cl-csr/ws/mock-server)
+  (:import-from :cl-csr/ws/ws
                 :send-from-server
                 :*target-client-id-list*
                 :pop-new-client-ids
                 :pop-deleted-client-ids
                 :pop-client-messages
                 :make-client-message)
-  (:import-from :cl-csr/mock/ws-client-mock
+  (:import-from :cl-csr/ws/mock-client
                 :get-bufferred-messages)
   (:import-from :cl-csr/t/test-utils
                 :make-dummy-message
                 :make-dummy-client-message
                 :expected-kind-seq-p
                 :expected-client-messages-p))
-(in-package :cl-csr/t/mock/ws-server-mock)
+(in-package :cl-csr/t/ws/mock-server)
 
 (defun same-client-ids-p (ids1 ids2)
   (equalp (sort ids1 #'<) (sort ids2 #'<)))

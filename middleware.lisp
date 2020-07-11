@@ -1,7 +1,7 @@
 (defpackage cl-csr/middleware
   (:use :cl)
   (:export :make-client-side-rendering-middleware)
-  (:import-from :cl-csr/ws-server-impl
+  (:import-from :cl-csr/ws/server
                 :make-ws-app)
   (:import-from :cl-csr/client/core
                 :output-client-js)

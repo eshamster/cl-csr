@@ -2,12 +2,12 @@
   (:use :cl
         :rove
         :cl-csr/protocol)
-  (:import-from :cl-csr/ws-server
+  (:import-from :cl-csr/ws/ws
                 :*target-client-id-list*)
-  (:import-from :cl-csr/mock/ws-client-mock
+  (:import-from :cl-csr/ws/mock-client
                 :get-bufferred-messages
                 :get-latest-messages)
-  (:import-from :cl-csr/mock/ws-server-mock
+  (:import-from :cl-csr/ws/mock-server
                 :add-mock-client)
   (:import-from :cl-csr/t/test-utils
                 :with-mock-ws-server

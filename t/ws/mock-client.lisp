@@ -1,11 +1,11 @@
-(defpackage cl-csr/t/mock/ws-client-mock
+(defpackage cl-csr/t/ws/mock-client
   (:use :cl
         :rove
-        :cl-csr/mock/ws-client-mock)
+        :cl-csr/ws/mock-client)
   (:import-from :cl-csr/t/test-utils
                 :expected-kind-seq-p
                 :make-dummy-message))
-(in-package :cl-csr/t/mock/ws-client-mock)
+(in-package :cl-csr/t/ws/mock-client)
 
 (deftest test-ws-client-mock
   (let ((wcm (make-instance 'ws-client-mock))

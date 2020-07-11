@@ -26,10 +26,11 @@
            ;; - for test - ;;
            :with-protocol-state
            :make-protocol-state)
-  (:import-from :cl-csr/ws-server
+  (:import-from :cl-csr/ws/ws
                 :get-ws-server
                 :send-from-server
-                :*target-client-id-list*
+                :*target-client-id-list*)
+  (:import-from :cl-csr/ws/utils
                 :same-target-client-list-p
                 :copy-target-client-id-list)
   (:import-from :cl-csr/utils/list

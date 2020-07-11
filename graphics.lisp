@@ -27,8 +27,9 @@
                 :send-draw-text)
   (:import-from :cl-csr/texture
                 :get-image-id)
-  (:import-from :cl-csr/ws-server
-                :*target-client-id-list*
+  (:import-from :cl-csr/ws/ws
+                :*target-client-id-list*)
+  (:import-from :cl-csr/ws/utils
                 :calc-common-target)
   (:import-from :alexandria
                 :make-keyword))

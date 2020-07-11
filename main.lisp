@@ -19,8 +19,6 @@
            :set-camera-scale
            ;; font
            :load-font
-           :calc-text-width
-           :calc-text-height
            ;; game-loop
            :start-game-loop
            :stop-game-loop

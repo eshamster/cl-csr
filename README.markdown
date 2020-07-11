@@ -1,3 +1,5 @@
+![.github/workflows/main.yml](https://github.com/eshamster/cl-csr/workflows/.github/workflows/main.yml/badge.svg)
+
 # CL-CSR - A client side reindering libirary in Common Lisp
 
 CL-CSR is a client side reindering libirary in Common Lisp.

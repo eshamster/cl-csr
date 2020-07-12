@@ -155,10 +155,12 @@
                                       id x y depth color fill-p width height rotate))))
 
 (defun draw-line (&key id x1 y1 x2 y2 depth color)
-  (setf (gethash id *draw-info-table*)
-        (make-draw-info :sender #'send-draw-line
-                        :param-table (init-table-by-params
-                                      id x1 y1 x2 y2 depth color))))
+  (let ((x 0)
+        (y 0))
+    (setf (gethash id *draw-info-table*)
+          (make-draw-info :sender #'send-draw-line
+                          :param-table (init-table-by-params
+                                        id x1 y1 x2 y2 depth color x y)))))
 
 (defun draw-arc (&key id x y depth color start-angle sweep-angle r)
   (setf (gethash id *draw-info-table*)
